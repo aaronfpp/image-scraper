@@ -1,43 +1,4 @@
-<script type="text/javascript">
-        var gk_isXlsx = false;
-        var gk_xlsxFileLookup = {};
-        var gk_fileData = {};
-        function filledCell(cell) {
-          return cell !== '' && cell != null;
-        }
-        function loadFileData(filename) {
-        if (gk_isXlsx && gk_xlsxFileLookup[filename]) {
-            try {
-                var workbook = XLSX.read(gk_fileData[filename], { type: 'base64' });
-                var firstSheetName = workbook.SheetNames[0];
-                var worksheet = workbook.Sheets[firstSheetName];
-
-                // Convert sheet to JSON to filter blank rows
-                var jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1, blankrows: false, defval: '' });
-                // Filter out blank rows (rows where all cells are empty, null, or undefined)
-                var filteredData = jsonData.filter(row => row.some(filledCell));
-
-                // Heuristic to find the header row by ignoring rows with fewer filled cells than the next row
-                var headerRowIndex = filteredData.findIndex((row, index) =>
-                  row.filter(filledCell).length >= filteredData[index + 1]?.filter(filledCell).length
-                );
-                // Fallback
-                if (headerRowIndex === -1 || headerRowIndex > 25) {
-                  headerRowIndex = 0;
-                }
-
-                // Convert filtered JSON back to CSV
-                var csv = XLSX.utils.aoa_to_sheet(filteredData.slice(headerRowIndex)); // Create a new sheet from filtered array of arrays
-                csv = XLSX.utils.sheet_to_csv(csv, { header: 1 });
-                return csv;
-            } catch (e) {
-                console.error(e);
-                return "";
-            }
-        }
-        return gk_fileData[filename] || "";
-        }
-        </script><!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
   <head>
     <meta charset="UTF-8">
@@ -428,16 +389,27 @@
         
         for (const size of section.sizes) {
           const type = ".png"; // Only download PNG files
-          const url = `${section.baseURL}${currentSKU}/${size}${type}`;
+          const url = `/api/fetch-image?sku=${currentSKU}&size=${size}&type=${type}`;
           const fileName = `${currentSKU}_${size}${type}`;
           
           try {
             const response = await fetch(url, { method: "GET" });
             console.log(`Fetching ${url}: Status ${response.status}`);
             if (response.ok) {
-              const blob = await response.blob();
-              zip.file(fileName, blob);
-              hasImages = true;
+              const data = await response.json();
+              if (data.isBase64Encoded) {
+                const binaryString = atob(data.body);
+                const len = binaryString.length;
+                const bytes = new Uint8Array(len);
+                for (let i = 0; i < len; i++) {
+                  bytes[i] = binaryString.charCodeAt(i);
+                }
+                const blob = new Blob([bytes], { type: data.headers['Content-Type'] });
+                zip.file(fileName, blob);
+                hasImages = true;
+              } else {
+                throw new Error('Response is not base64 encoded');
+              }
             } else {
               missingImages.push(`${size}${type}`);
               console.log(`Failed to fetch ${url}: Status ${response.status}`);
@@ -648,7 +620,7 @@
       }
       
       async function checkImages(sku, signal) {
-        const urls = [`${section.baseURL}${sku}/100.png`];
+        const urls = [`/api/fetch-image?sku=${sku}&size=100&type=.png`];
         let hasImages = false;
         
         const timeoutController = new AbortController();
@@ -657,34 +629,27 @@
         for (const url of urls) {
           let attempts = 0;
           const maxAttempts = 2;
-          let method = "HEAD";
           
           while (attempts < maxAttempts) {
             try {
               const response = await fetch(url, { 
-                method: method, 
+                method: 'GET', 
                 signal: AbortSignal.any([signal, timeoutController.signal])
               });
-              console.log(`Checking ${url} (${method}): Status ${response.status}, Attempt ${attempts + 1}`);
+              console.log(`Checking ${url}: Status ${response.status}, Attempt ${attempts + 1}`);
               if (response.ok) {
                 hasImages = true;
                 break;
               } else if ([429, 503].includes(response.status)) {
-                console.log(`Retrying ${url} (${method}): Status ${response.status}`);
+                console.log(`Retrying ${url}: Status ${response.status}`);
                 attempts++;
                 await new Promise(resolve => setTimeout(resolve, 500));
               } else {
-                console.log(`Failed to fetch ${url} (${method}): Status ${response.status}`);
+                console.log(`Failed to fetch ${url}: Status ${response.status}`);
                 break;
               }
             } catch (error) {
-              console.error(`Error checking ${url} (${method}): ${error.message}, Attempt ${attempts + 1}`);
-              if (error.message.includes("Failed to fetch") && method === "HEAD") {
-                console.log(`Possible CORS error for ${url} (HEAD), switching to GET`);
-                method = "GET";
-                attempts = 0;
-                continue;
-              }
+              console.error(`Error checking ${url}: ${error.message}, Attempt ${attempts + 1}`);
               if (error.name === "AbortError") {
                 clearTimeout(timeoutId);
                 throw error;
@@ -700,7 +665,7 @@
         clearTimeout(timeoutId);
         console.log(`checkImages for SKU ${sku}: ${hasImages ? "Valid" : "Invalid"}`);
         if (!hasImages) {
-          errorMessage.textContent = `Warning: SKU ${sku} check failed, likely due to CORS restrictions. Host on a domain allowed by images.ifsta.org, use a proxy, or contact the server admin.`;
+          errorMessage.textContent = `Error: No images found for SKU ${sku}. The server may be down, or the SKU may not exist.`;
           errorMessage.style.display = "block";
         }
         return hasImages;
@@ -727,7 +692,7 @@
             const heading = `${size}${type}`;
             innerCard.innerHTML += `<h3>${heading}</h3>`;
             
-            const imgSrc = `${section.baseURL}${sku}/${size}${type}`;
+            const imgSrc = `/api/fetch-image?sku=${sku}&size=${size}&type=${type}`;
             const img = document.createElement("img");
             img.src = imgSrc;
             img.alt = `${heading} for SKU ${sku}`;
