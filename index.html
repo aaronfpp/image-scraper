@@ -305,7 +305,7 @@
         fileTypes: [".png", ".webp"],
         inputLabel: "SKU",
         validationRegex: /^[0-9]{5}$/,
-        fetchTimeout: 10000 // Increased to 10 seconds
+        fetchTimeout: 10000
       };
       
       const themeBtn = document.getElementById("theme-btn");
@@ -326,8 +326,9 @@
       const checkedSKUsDisplay = document.getElementById("checked-skus");
       const validSKUsRangeDisplay = document.getElementById("valid-skus-range");
       
-      let testedSKUs = [];
-      let validSKUs = [];
+      // Initialize SKU history from localStorage
+      let testedSKUs = JSON.parse(localStorage.getItem("testedSKUs")) || [];
+      let validSKUs = JSON.parse(localStorage.getItem("validSKUs")) || [];
       let currentSKU = localStorage.getItem("currentSKU") && section.validationRegex.test(localStorage.getItem("currentSKU")) ? localStorage.getItem("currentSKU") : "00000";
       let isScanning = false;
       let abortController = null;
@@ -338,6 +339,9 @@
       let isDarkTheme = false;
       
       skuInput.value = currentSKU;
+      updateCheckedSKUsDisplay();
+      updateValidSKUsRange();
+      updateInteriorButtonState();
       
       themeBtn.addEventListener("click", toggleTheme);
       downloadBtn.addEventListener("click", downloadImagesAsZip);
@@ -452,6 +456,7 @@
         loading.style.display = "block";
         tableContainer.innerHTML = "";
         testedSKUs = []; // Reset testedSKUs on manual submission
+        localStorage.setItem("testedSKUs", JSON.stringify(testedSKUs));
         checkedSKUsDisplay.textContent = "Checked SKUs (no images): None";
         
         if (!input) {
@@ -502,6 +507,7 @@
           prevExteriorBtn.disabled = false;
           nextExteriorBtn.disabled = false;
           testedSKUs = [];
+          localStorage.setItem("testedSKUs", JSON.stringify(testedSKUs));
           checkedSKUsDisplay.textContent = "Checked SKUs (no images): None";
           loading.style.display = "none";
           errorMessage.textContent = `Error during scan: ${error.message}`;
@@ -513,6 +519,8 @@
         if (scanCount >= maxScanAttempts) {
           isScanning = false;
           cancelBtn.style.display = "none";
+          prevExteriorBtn.disabled = false;
+          nextExteriorBtn.disabled = false;
           loading.style.display = "none";
           errorMessage.textContent = "Error: No valid SKUs found after checking multiple options. Try a different range or manual entry.";
           errorMessage.style.display = "block";
@@ -529,6 +537,8 @@
         if (nextSKU === null || abortController.signal.aborted) {
           isScanning = false;
           cancelBtn.style.display = "none";
+          prevExteriorBtn.disabled = false;
+          nextExteriorBtn.disabled = false;
           loading.style.display = "none";
           if (nextSKU === null) {
             errorMessage.textContent = `Error: Reached ${direction > 0 ? "maximum" : "minimum"} SKU.`;
@@ -546,6 +556,8 @@
         if (abortController.signal.aborted) {
           isScanning = false;
           cancelBtn.style.display = "none";
+          prevExteriorBtn.disabled = false;
+          nextExteriorBtn.disabled = false;
           loading.style.display = "none";
           console.log(`Scan aborted for SKU ${nextSKU}`);
           return;
@@ -557,14 +569,25 @@
           localStorage.setItem("currentSKU", currentSKU);
           if (!validSKUs.includes(nextSKU)) {
             validSKUs.push(nextSKU);
+            localStorage.setItem("validSKUs", JSON.stringify(validSKUs));
             updateInteriorButtonState();
             updateValidSKUsRange();
           }
           console.log(`Found valid SKU ${nextSKU}, displaying images`);
           displayImages(currentSKU);
+          // Reset scan state
+          isScanning = false;
+          cancelBtn.style.display = "none";
+          prevExteriorBtn.disabled = false;
+          nextExteriorBtn.disabled = false;
+          loading.style.display = "none";
+          testedSKUs = [];
+          localStorage.setItem("testedSKUs", JSON.stringify(testedSKUs));
+          checkedSKUsDisplay.textContent = "Checked SKUs (no images): None";
         } else {
           console.log(`No images for SKU ${nextSKU}, adding to testedSKUs`);
           testedSKUs.push(nextSKU);
+          localStorage.setItem("testedSKUs", JSON.stringify(testedSKUs));
           updateCheckedSKUsDisplay();
           await navigateSKUInternal(direction);
         }
@@ -631,7 +654,7 @@
         
         for (const url of urls) {
           let attempts = 0;
-          const maxAttempts = 3; // Increased to 3 for timeout retries
+          const maxAttempts = 3;
           
           while (attempts < maxAttempts && !signal.aborted) {
             const timeoutController = new AbortController();
@@ -659,7 +682,7 @@
               } else if ([429, 503].includes(response.status)) {
                 console.log(`Retrying ${url}: Status ${response.status}`);
                 attempts++;
-                await new Promise(resolve => setTimeout(resolve, 1000)); // Increased delay to 1s
+                await new Promise(resolve => setTimeout(resolve, 1000));
                 continue;
               } else {
                 console.log(`Failed to fetch ${url}: Status ${response.status}`);
@@ -751,6 +774,7 @@
                 loading.style.display = "none";
                 if (loadedImages > 0 && !validSKUs.includes(sku)) {
                   validSKUs.push(sku);
+                  localStorage.setItem("validSKUs", JSON.stringify(validSKUs));
                   updateInteriorButtonState();
                   updateValidSKUsRange();
                 }
@@ -777,6 +801,7 @@
                 loading.style.display = "none";
                 if (loadedImages > 0 && !validSKUs.includes(sku)) {
                   validSKUs.push(sku);
+                  localStorage.setItem("validSKUs", JSON.stringify(validSKUs));
                   updateInteriorButtonState();
                   updateValidSKUsRange();
                 }
@@ -830,6 +855,8 @@
         tableContainer.innerHTML = "";
         testedSKUs = [];
         validSKUs = [];
+        localStorage.setItem("testedSKUs", JSON.stringify(testedSKUs));
+        localStorage.setItem("validSKUs", JSON.stringify(validSKUs));
         isScanning = false;
         showAllSizes = false;
         sizesBtn.textContent = "Sizes";
@@ -852,6 +879,8 @@
         abortController = null;
         isScanning = false;
         cancelBtn.style.display = "none";
+        prevExteriorBtn.disabled = false;
+        nextExteriorBtn.disabled = false;
         loading.style.display = "none";
         errorMessage.style.display = "none";
         errorMessage.textContent = "";
