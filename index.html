@@ -404,7 +404,7 @@
                 for (let i = 0; i < len; i++) {
                   bytes[i] = binaryString.charCodeAt(i);
                 }
-                const blob = new Blob([bytes], { type: data.headers['Content-Type'] });
+                const blob = new Blob([bytes], { type: data.contentType });
                 zip.file(fileName, blob);
                 hasImages = true;
               } else {
@@ -644,11 +644,11 @@
                     hasImages = true;
                   } else {
                     console.log(`Invalid response for ${url}: Not base64 encoded`);
+                    hasImages = true; // Assume valid if response is 200
                   }
                 } catch (error) {
                   console.error(`Error parsing JSON for ${url}: ${error.message}`);
-                  // Assume image is valid if response is 200, even if JSON parsing fails
-                  hasImages = true;
+                  hasImages = true; // Assume valid if response is 200 but JSON fails
                 }
               } else if ([429, 503].includes(response.status)) {
                 console.log(`Retrying ${url}: Status ${response.status}`);
@@ -720,15 +720,16 @@
               console.log(`Failed to load ${imgSrc}`);
               if (loadedImages + failedImages === totalImages) {
                 loading.style.display = "none";
-                if (size === "default" && loadedImages === 0) {
+                if (loadedImages === 0) {
                   try {
                     const response = await fetch(imgSrc);
                     const data = response.ok ? await response.json() : { error: `Status ${response.status}` };
                     errorMessage.textContent = `Error: No images found for SKU ${sku}. ${data.error || 'The SKU may not exist or the server is unavailable.'}`;
+                    errorMessage.style.display = "block";
                   } catch (error) {
                     errorMessage.textContent = `Error: No images found for SKU ${sku}. Failed to connect to server: ${error.message}`;
+                    errorMessage.style.display = "block";
                   }
-                  errorMessage.style.display = "block";
                 } else if (loadedImages > 0 && !validSKUs.includes(sku)) {
                   validSKUs.push(sku);
                   updateInteriorButtonState();
