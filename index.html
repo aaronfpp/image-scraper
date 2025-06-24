@@ -638,8 +638,12 @@
               });
               console.log(`Checking ${url}: Status ${response.status}, Attempt ${attempts + 1}`);
               if (response.ok) {
-                hasImages = true;
-                break;
+                const data = await response.json();
+                if (data.isBase64Encoded) {
+                  hasImages = true;
+                } else {
+                  console.log(`Invalid response for ${url}: Not base64 encoded`);
+                }
               } else if ([429, 503].includes(response.status)) {
                 console.log(`Retrying ${url}: Status ${response.status}`);
                 attempts++;
@@ -665,7 +669,7 @@
         clearTimeout(timeoutId);
         console.log(`checkImages for SKU ${sku}: ${hasImages ? "Valid" : "Invalid"}`);
         if (!hasImages) {
-          errorMessage.textContent = `Error: No images found for SKU ${sku}. The server may be down, or the SKU may not exist.`;
+          errorMessage.textContent = `Error: No images found for SKU ${sku}. The SKU may not exist or the server is unavailable. Check the server status or try another SKU.`;
           errorMessage.style.display = "block";
         }
         return hasImages;
@@ -698,7 +702,7 @@
             img.alt = `${heading} for SKU ${sku}`;
             img.classList.add("default-image");
             
-            img.onerror = () => {
+            img.onerror = async () => {
               failedImages++;
               missingImages.push(heading);
               innerCard.removeChild(img);
@@ -711,7 +715,13 @@
               if (loadedImages + failedImages === totalImages) {
                 loading.style.display = "none";
                 if (size === "default" && loadedImages === 0) {
-                  errorMessage.textContent = `Error: No images found for SKU ${sku}. Missing: ${missingImages.join(", ")}`;
+                  try {
+                    const response = await fetch(imgSrc);
+                    const data = response.ok ? await response.json() : { error: `Status ${response.status}` };
+                    errorMessage.textContent = `Error: No images found for SKU ${sku}. ${data.error || 'The SKU may not exist or the server is unavailable.'}`;
+                  } catch (error) {
+                    errorMessage.textContent = `Error: No images found for SKU ${sku}. Failed to connect to server: ${error.message}`;
+                  }
                   errorMessage.style.display = "block";
                 } else if (size === "default" && !validSKUs.includes(sku)) {
                   validSKUs.push(sku);
