@@ -1,6 +1,6 @@
-import fetch from 'node-fetch';
+const fetch = require('node-fetch');
 
-export async function handler(event) {
+exports.handler = async function(event) {
   const { sku, size, type } = event.queryStringParameters;
   const url = `https://images.ifsta.org/products/${sku}/${size}${type}`;
   console.log(`Fetching URL: ${url}`);
@@ -25,4 +25,4 @@ export async function handler(event) {
       body: JSON.stringify({ error: error.message })
     };
   }
-}
+};
