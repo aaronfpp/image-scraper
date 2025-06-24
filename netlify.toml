@@ -1,0 +1,4 @@
+[[redirects]]
+  from = "/api/fetch-image/*"
+  to = "/.netlify/functions/fetch-image"
+  status = 200
