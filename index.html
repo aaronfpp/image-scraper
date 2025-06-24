@@ -305,7 +305,7 @@
         fileTypes: [".png", ".webp"],
         inputLabel: "SKU",
         validationRegex: /^[0-9]{5}$/,
-        fetchTimeout: 5000
+        fetchTimeout: 10000 // Increased to 10 seconds
       };
       
       const themeBtn = document.getElementById("theme-btn");
@@ -493,14 +493,20 @@
         
         console.log(`Starting scan from SKU ${currentSKU}, direction ${direction}, testedSKUs: ${testedSKUs.join(", ")}`);
         
-        await navigateSKUInternal(direction);
-        
-        isScanning = false;
-        cancelBtn.style.display = "none";
-        prevExteriorBtn.disabled = false;
-        nextExteriorBtn.disabled = false;
-        testedSKUs = []; // Reset testedSKUs after scan
-        checkedSKUsDisplay.textContent = "Checked SKUs (no images): None";
+        try {
+          await navigateSKUInternal(direction);
+        } catch (error) {
+          console.error(`Scan error: ${error.message}`);
+          isScanning = false;
+          cancelBtn.style.display = "none";
+          prevExteriorBtn.disabled = false;
+          nextExteriorBtn.disabled = false;
+          testedSKUs = [];
+          checkedSKUsDisplay.textContent = "Checked SKUs (no images): None";
+          loading.style.display = "none";
+          errorMessage.textContent = `Error during scan: ${error.message}`;
+          errorMessage.style.display = "block";
+        }
       }
       
       async function navigateSKUInternal(direction) {
@@ -623,14 +629,14 @@
         const urls = [`/api/fetch-image?sku=${sku}&size=100&type=.png`];
         let hasImages = false;
         
-        const timeoutController = new AbortController();
-        const timeoutId = setTimeout(() => timeoutController.abort(), section.fetchTimeout);
-        
         for (const url of urls) {
           let attempts = 0;
-          const maxAttempts = 2;
+          const maxAttempts = 3; // Increased to 3 for timeout retries
           
-          while (attempts < maxAttempts) {
+          while (attempts < maxAttempts && !signal.aborted) {
+            const timeoutController = new AbortController();
+            const timeoutId = setTimeout(() => timeoutController.abort(), section.fetchTimeout);
+            
             try {
               const response = await fetch(url, { 
                 method: 'GET', 
@@ -653,26 +659,33 @@
               } else if ([429, 503].includes(response.status)) {
                 console.log(`Retrying ${url}: Status ${response.status}`);
                 attempts++;
-                await new Promise(resolve => setTimeout(resolve, 500));
+                await new Promise(resolve => setTimeout(resolve, 1000)); // Increased delay to 1s
+                continue;
               } else {
                 console.log(`Failed to fetch ${url}: Status ${response.status}`);
                 break;
               }
             } catch (error) {
               console.error(`Error checking ${url}: ${error.message}, Attempt ${attempts + 1}`);
-              if (error.name === "AbortError") {
+              if (error.name === "AbortError" && !signal.aborted) {
+                console.log(`Timeout for ${url}, retrying...`);
+                attempts++;
+                await new Promise(resolve => setTimeout(resolve, 1000));
+                continue;
+              } else if (error.name === "AbortError") {
                 clearTimeout(timeoutId);
-                throw error;
+                throw error; // Manual abort via cancel button
               }
-              attempts++;
-              await new Promise(resolve => setTimeout(resolve, 500));
+              break; // Other errors (e.g., network failure)
+            } finally {
+              clearTimeout(timeoutId);
             }
+            if (hasImages) break;
           }
           if (hasImages) break;
           await new Promise(resolve => setTimeout(resolve, 500));
         }
         
-        clearTimeout(timeoutId);
         console.log(`checkImages for SKU ${sku}: ${hasImages ? "Valid" : "Invalid"}`);
         if (!hasImages) {
           errorMessage.textContent = `Error: No images found for SKU ${sku}. The SKU may not exist or the server is unavailable.`;
@@ -707,7 +720,6 @@
             img.alt = `${heading} for SKU ${sku}`;
             img.classList.add("default-image");
             
-            // Fetch image data to check response before setting src
             try {
               const response = await fetch(imgSrc, { method: 'GET' });
               console.log(`Fetching ${imgSrc}: Status ${response.status}`);
