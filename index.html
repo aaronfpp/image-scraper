@@ -681,7 +681,7 @@
         return hasImages;
       }
       
-      function displayImages(sku) {
+      async function displayImages(sku) {
         tableContainer.innerHTML = "";
         let loadedImages = 0;
         let failedImages = 0;
@@ -704,43 +704,33 @@
             
             const imgSrc = `/api/fetch-image?sku=${sku}&size=${size}&type=${type}`;
             const img = document.createElement("img");
-            img.src = imgSrc;
             img.alt = `${heading} for SKU ${sku}`;
             img.classList.add("default-image");
             
-            img.onerror = async () => {
+            // Fetch image data to check response before setting src
+            try {
+              const response = await fetch(imgSrc, { method: 'GET' });
+              console.log(`Fetching ${imgSrc}: Status ${response.status}`);
+              if (response.ok) {
+                const data = await response.json();
+                if (data.isBase64Encoded) {
+                  img.src = `data:${data.contentType};base64,${data.body}`;
+                  innerCard.appendChild(img);
+                } else {
+                  throw new Error('Response is not base64 encoded');
+                }
+              } else {
+                throw new Error(`Status ${response.status}`);
+              }
+            } catch (error) {
               failedImages++;
               missingImages.push(heading);
-              innerCard.removeChild(img);
               const errorText = document.createElement("div");
               errorText.classList.add("image-error");
               errorText.textContent = `Image not found for ${heading}`;
               innerCard.appendChild(errorText);
-              
-              console.log(`Failed to load ${imgSrc}`);
-              if (loadedImages + failedImages === totalImages) {
-                loading.style.display = "none";
-                if (loadedImages === 0) {
-                  try {
-                    const response = await fetch(imgSrc);
-                    const data = response.ok ? await response.json() : { error: `Status ${response.status}` };
-                    errorMessage.textContent = `Error: No images found for SKU ${sku}. ${data.error || 'The SKU may not exist or the server is unavailable.'}`;
-                    errorMessage.style.display = "block";
-                  } catch (error) {
-                    errorMessage.textContent = `Error: No images found for SKU ${sku}. Failed to connect to server: ${error.message}`;
-                    errorMessage.style.display = "block";
-                  }
-                } else if (loadedImages > 0 && !validSKUs.includes(sku)) {
-                  validSKUs.push(sku);
-                  updateInteriorButtonState();
-                  updateValidSKUsRange();
-                }
-                if (missingImages.length > 0) {
-                  errorMessage.textContent = `Warning: Some images missing for SKU ${sku}: ${missingImages.join(", ")}`;
-                  errorMessage.style.display = "block";
-                }
-              }
-            };
+              console.log(`Failed to load ${imgSrc}: ${error.message}`);
+            }
             
             img.onload = () => {
               loadedImages++;
@@ -752,14 +742,45 @@
                   updateInteriorButtonState();
                   updateValidSKUsRange();
                 }
-                if (missingImages.length > 0) {
+                if (loadedImages === 0) {
+                  errorMessage.textContent = `Error: No images found for SKU ${sku}. The SKU may not exist or the server is unavailable.`;
+                  errorMessage.style.display = "block";
+                } else if (missingImages.length > 0) {
                   errorMessage.textContent = `Warning: Some images missing for SKU ${sku}: ${missingImages.join(", ")}`;
                   errorMessage.style.display = "block";
                 }
               }
             };
             
-            innerCard.appendChild(img);
+            img.onerror = () => {
+              failedImages++;
+              missingImages.push(heading);
+              innerCard.removeChild(img);
+              const errorText = document.createElement("div");
+              errorText.classList.add("image-error");
+              errorText.textContent = `Image not found for ${heading}`;
+              innerCard.appendChild(errorText);
+              console.log(`Failed to load ${imgSrc}`);
+              if (loadedImages + failedImages === totalImages) {
+                loading.style.display = "none";
+                if (loadedImages > 0 && !validSKUs.includes(sku)) {
+                  validSKUs.push(sku);
+                  updateInteriorButtonState();
+                  updateValidSKUsRange();
+                }
+                if (loadedImages === 0) {
+                  errorMessage.textContent = `Error: No images found for SKU ${sku}. The SKU may not exist or the server is unavailable.`;
+                  errorMessage.style.display = "block";
+                } else if (missingImages.length > 0) {
+                  errorMessage.textContent = `Warning: Some images missing for SKU ${sku}: ${missingImages.join(", ")}`;
+                  errorMessage.style.display = "block";
+                }
+              }
+            };
+            
+            if (img.src) {
+              innerCard.appendChild(img);
+            }
           }
         }
       }
