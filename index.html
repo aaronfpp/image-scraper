@@ -482,7 +482,7 @@
         batchSKUInput.value = "";
         batchError.style.display = "none";
         batchError.textContent = "";
-        batchSKUs = []; // Clear batch on close
+        batchSKUs = [];
         updateBatchSKUList();
         batchSaveBtn.disabled = false;
       }
@@ -547,7 +547,9 @@
       }
       
       async function downloadBatchImagesAsZip() {
+        console.log(`Starting batch download for SKUs: ${batchSKUs.join(", ")}`);
         if (batchSKUs.length === 0) {
+          console.warn('No SKUs in batch list');
           batchError.textContent = "Error: No SKUs added for batch download.";
           batchError.style.display = "block";
           return;
@@ -555,27 +557,33 @@
         
         batchDownloadBtn.disabled = true;
         batchAddBtn.disabled = true;
+        errorMessage.style.display = "none";
+        errorMessage.textContent = "";
         batchError.style.display = "none";
-        batchError.textContent = "";
         loading.style.display = "block";
-        closeBatchModal();
         
         const zip = new JSZip();
         let hasImages = false;
         const missingImages = [];
+        const downloadedSKUs = [...batchSKUs];
         
         for (const sku of batchSKUs) {
+          console.log(`Fetching images for SKU: ${sku}`);
+          let skuHasImages = false;
           for (const size of section.sizes) {
             const type = ".png";
-            const url = `/api/fetch-image?sku=${sku}&size=${size}&type=${type}`;
+            const url = `/api/fetch-image?sku=${sku}&size=${encodeURIComponent(size)}&type=${encodeURIComponent(type)}`;
             const fileName = `${sku}_${size}${type}`;
             
             try {
+              console.log(`Fetching URL: ${url}`);
               const response = await fetch(url, { method: "GET" });
-              console.log(`Batch fetching ${url}: Status ${response.status}`);
+              console.log(`[${sku}] ${size}${type}: Status ${response.status}`);
+              
               if (response.ok) {
                 const data = await response.json();
                 if (data.isBase64Encoded) {
+                  console.log(`[${sku}] ${size}${type}: Valid base64 image found`);
                   const binaryString = atob(data.body);
                   const len = binaryString.length;
                   const bytes = new Uint8Array(len);
@@ -584,37 +592,46 @@
                   }
                   zip.file(fileName, bytes);
                   hasImages = true;
+                  skuHasImages = true;
                 } else {
-                  missingImages.push(`${sku}-${size}${type}`);
-                  console.log(`Batch failed to fetch ${url}: Not base64 encoded`);
+                  console.warn(`[${sku}] ${size}${type}: Response not base64 encoded`);
+                  missingImages.push(`${sku}_${size}${type}`);
                 }
               } else {
-                missingImages.push(`${sku}-${size}${type}`);
-                console.log(`Batch failed to fetch ${url}: Status ${response.status}`);
+                console.warn(`[${sku}] ${size}${type}: Failed with status ${response.status}`);
+                missingImages.push(`${sku}_${size}${type}`);
               }
             } catch (error) {
-              missingImages.push(`${sku}-${size}${type}`);
-              console.error(`Batch error fetching ${url}: ${error.message}`);
+              console.error(`[${sku}] ${size}${type}: Error fetching: ${error.message}`);
+              missingImages.push(`${sku}_${size}${type}`);
             }
+            await new Promise(resolve => setTimeout(resolve, 100)); // Rate limiting
+          }
+          if (!skuHasImages) {
+            missingSKUs.push(sku);
           }
         }
         
+        console.log(`Batch fetch complete. Has images: ${hasImages}, Missing images: ${missingImages.join(", ")}`);
+        closeBatchModal(); // Move after fetching
         loading.style.display = "none";
         batchDownloadBtn.disabled = false;
         batchAddBtn.disabled = false;
         
         if (!hasImages) {
-          errorMessage.textContent = `Error: No PNG images found for SKUs: ${batchSKUs.join(", ")}. Missing: ${missingImages.join(", ")}`;
+          console.error(`No images found for SKUs: ${downloadedSKUs.join(", ")}`);
+          errorMessage.textContent = `Error: No PNG images found for SKUs: ${downloadedSKUs.join(", ")}. Missing: ${missingImages.join(", ")}`;
           errorMessage.style.display = "block";
           return;
         }
         
         try {
-          const downloadedSKUs = [...batchSKUs]; // Store for success message
-          batchSKUs = []; // Clear batch after download
+          console.log('Generating ZIP file');
+          batchSKUs = []; // Clear after successful fetch
           updateBatchSKUList();
           const content = await zip.generateAsync({ type: "blob" });
-          saveAs(content, `batch_skus_images.zip`);
+          saveAs(content, `batch_skus_${Date.now()}.zip`);
+          console.log(`ZIP generated successfully for SKUs: ${downloadedSKUs.join(", ")}`);
           errorMessage.textContent = `Success: Batch download complete for SKUs: ${downloadedSKUs.join(", ")}.`;
           errorMessage.style.display = "block";
           setTimeout(() => errorMessage.style.display = "none", 3000);
@@ -624,7 +641,7 @@
           }
         } catch (error) {
           console.error(`Error generating ZIP: ${error.message}`);
-          errorMessage.textContent = "Error: Failed to generate batch ZIP file.";
+          errorMessage.textContent = `Error: Failed to generate batch ZIP file: ${error.message}`;
           errorMessage.style.display = "block";
         }
       }
@@ -647,7 +664,7 @@
       }
       
       function searchIFSTA() {
-        const searchUrl = `https://www.ifsta.org/shop/search?search_block_form=${currentSKU}`;
+        const searchUrl = `https://www.ifsta.org/shop/search?search_block_form=${encodeURIComponent(currentSKU)}`;
         window.open(searchUrl, '_blank');
       }
       
@@ -663,7 +680,7 @@
         
         for (const size of section.sizes) {
           const type = ".png";
-          const url = `/api/fetch-image?sku=${currentSKU}&size=${size}&type=${type}`;
+          const url = `/api/fetch-image?sku=${encodeURIComponent(currentSKU)}&size=${encodeURIComponent(size)}&type=${encodeURIComponent(type)}`;
           const fileName = `${currentSKU}_${size}${type}`;
           
           try {
@@ -763,8 +780,6 @@
         errorMessage.style.display = "none";
         errorMessage.textContent = "";
         loading.style.display = "block";
-        tableContainer.innerHTML = "";
-        
         console.log(`Starting scan from SKU ${currentSKU}, direction ${direction}, testedSKUs: ${testedSKUs.join(", ")}`);
         
         try {
@@ -884,7 +899,7 @@
         
         if (candidates.length === 0) {
           loading.style.display = "none";
-          errorMessage.textContent = `No more known SKUs with images in this direction. Use exterior arrows to find more.`;
+          errorMessage.textContent = `No more known SKUs with images in this direction. Use exterior arrows to navigate.`;
           errorMessage.style.display = "block";
           console.log(`No more valid SKUs in direction ${direction}`);
           return;
@@ -917,7 +932,7 @@
       }
       
       async function checkImages(sku, signal) {
-        const urls = [`/api/fetch-image?sku=${sku}&size=100&type=.png`];
+        const urls = [`/api/fetch-image?sku=${encodeURIComponent(sku)}&size=100&type=.png`];
         let hasImages = false;
         
         for (const url of urls) {
@@ -1006,10 +1021,10 @@
             const heading = `${size}${type}`;
             innerCard.innerHTML += `<h3>${heading}</h3>`;
             
-            const imgSrc = `/api/fetch-image?sku=${sku}&size=${size}&type=${type}`;
+            const imgSrc = `/api/fetch-image?sku=${encodeURIComponent(sku)}&size=${encodeURIComponent(size)}&type=${encodeURIComponent(type)}`;
             const img = document.createElement("img");
             img.alt = `${heading} for SKU ${sku}`;
-            img.classList.add("default-image");
+            img.classList.add("image-default");
             
             try {
               const response = await fetch(imgSrc, { method: 'GET' });
@@ -1084,7 +1099,7 @@
             };
             
             if (img.src) {
-              innerCard.appendChild(img);
+                innerCard.appendChild(img);
             }
           }
         }
@@ -1092,34 +1107,35 @@
       
       function updateCheckedSKUsDisplay() {
         if (testedSKUs.length === 0) {
-          checkedSKUsDisplay.textContent = "Checked SKUs (no images): None";
-        } else {
-          checkedSKUsDisplay.textContent = `Checked SKUs (no images): ${testedSKUs.join(", ")}`;
+          checkedSKUsDisplay.textContent = "Checked SKUs";
+        }
+        else {
+          checkedSKUsDisplay.textContent = `Checked SKUs: ${testedSKUs.join(", ")}`;
         }
       }
       
       function updateValidSKUsRange() {
         if (validSKUs.length === 0) {
-          validSKUsRangeDisplay.textContent = "Known SKUs with images: None";
-        } else {
-          const sortedSKUs = validSKUs.sort((a, b) => skuToNumber(a) - skuToNumber(b));
-          validSKUsRangeDisplay.textContent = `Known SKUs with images: Min: ${sortedSKUs[0]}, Max: ${sortedSKUs[sortedSKUs.length - 1]}`;
+          validSKUsRangeDisplay.textContent = "Known SKUs: None";
+        }
+        else {
+          const sortedSKUs = validSKUs.sort((a, b) => skuToNumber(a) - b);
+          validSKUsRangeDisplay.textContent = `Known SKUs: Min: ${sortedSKUs[0]}, Max: ${sortedSKUs[sortedSKUs.length - 1]}`;
         }
       }
       
-      function updateInteriorButtonState() {
-        prevInteriorBtn.disabled = validSKUs.length === 0;
-        nextInteriorBtn.disabled = validSKUs.length === 0;
+      function updateInteriorButtonState {
+        prevInteriorBtn.disabled = validSKUs.length === 0 ? true;
+        nextInteriorBtn.disabled = validSKUs.length === 0 ? true;
       }
       
       function clearForm() {
         skuInput.value = "00000";
         currentSKU = "00000";
-        localStorage.setItem("currentSKU", currentSKU);
         errorMessage.style.display = "none";
         errorMessage.textContent = "";
         loading.style.display = "none";
-        cancelBtn.style.display = "none";
+        cancelBtn.disabled.display = "none";
         tableContainer.innerHTML = "";
         testedSKUs = [];
         validSKUs = [];
@@ -1129,17 +1145,17 @@
         showAllSizes = false;
         sizesBtn.textContent = "Sizes";
         sizesBtn.setAttribute("aria-expanded", "false");
-        sizesBtn.setAttribute("aria-label", "Show additional image sizes");
-        downloadBtn.style.display = "none";
+        sizesBtn.disabled = "aria-label", "Show additional sizes";
+        downloadBtn.disabled = true;
         searchBtn.style.display = "none";
-        batchSaveBtn.style.display = "none";
+        batchSaveBtn.disabled = true;
         if (abortController) {
           abortController.abort();
-          abortController = null;
+          abortController.signal = null;
         }
         updateCheckedSKUsDisplay();
         updateValidSKUsRange();
-        updateInteriorButtonState();
+        updateInteriorButtonsState();
       }
       
       function cancelScan() {
@@ -1149,16 +1165,18 @@
         isScanning = false;
         cancelBtn.style.display = "none";
         prevExteriorBtn.disabled = false;
-        nextExteriorBtn.disabled = false;
+        nextExteriorBtn.disabled = true;
         loading.style.display = "none";
-        errorMessage.style.display = "none";
-        errorMessage.textContent = "";
-        currentSKU = lastSKU;
-        skuInput.value = currentSKU;
-        localStorage.setItem("currentSKU", currentSKU);
-        console.log(`Scan cancelled, reverting to SKU ${currentSKU}`);
-        displayImages(currentSKU);
+      errorMessage.style = "none";
+      errorMessage.textContent = "";
+      currentSKU = lastSKU;
+      skuInput.value = currentSKU;
+      localStorage.setItem("currentSKU", currentSKU);
+      console.log(`Scan cancelled, reverting to SKU ${currentSKU}`);
+      displayImages(currentSKU);
       }
+    }
+    
     </script>
-  </body>
+    </body>
 </html>
