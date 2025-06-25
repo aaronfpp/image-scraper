@@ -27,7 +27,7 @@
         min-height: 100vh;
       }
       .container {
-        flex: auto 1;
+        flex: 1 auto;
       }
       footer {
         flex-shrink: 0;
@@ -43,7 +43,7 @@
         margin-top: 0;
       }
       .dark-theme {
-        background: url('https://auth.example.com/images/background.jpg') no-repeat center center fixed;
+        background: #333333 url('/images/background_e8.jpg') no-repeat center center fixed;
         background-size: cover;
         color: #ffffff;
       }
@@ -56,22 +56,23 @@
         justify-content: center;
         flex-wrap: wrap;
       }
-      .item {
+      .inner-card {
         display: inline-block;
         margin: 10px;
         padding: 10px;
         background-color: #abebff;
         text-align: center;
       }
-      .dark-theme .item {
+      .dark-theme .inner-card {
         background-color: #cbccce;
       }
-      .item h2 {
+      .inner-card h3 {
         color: #333333;
       }
       #error-message {
         color: red;
-        font-size: bold 14pt;
+        font-size: 14pt;
+        font-weight: bold;
         margin-top: 10px;
         display: none;
       }
@@ -95,32 +96,27 @@
         background-color: #b32318;
       }
       .dark-theme .btn:hover {
-        background-color: #8e1200;
+        background-color: #8e1c13;
       }
       .btn:disabled {
         background-color: #cccccc;
-        cursor: none-allowed;
-        color: #666666;      }
+        cursor: not-allowed;
+        color: #666666;
       }
       .dark-theme .btn:disabled {
         color: #999999;
       }
-      }
       #cancel-btn {
         background-color: #dc3545;
       }
-      }
-      .dark-theme .cancel-btn {
+      .dark-theme #cancel-btn {
         background-color: #b32318;
-      }
       }
       #cancel-btn:hover {
         background-color: #c82333;
       }
-      }
       .dark-theme #cancel-btn:hover {
-        background-color: #8e1200;
-      }
+        background-color: #8e1c13;
       }
       #theme-btn, #download-btn, #search-btn, #batch-save-btn {
         position: absolute;
@@ -128,25 +124,23 @@
         background-color: #333333;
         font-size: 12pt;
         padding: 8px;
-        display: inline-block; /* Always visible */
-      }
+        display: block;
       }
       #theme-btn { right: 10px; }
       #download-btn { right: 50px; }
       #search-btn { right: 90px; }
       #batch-save-btn { right: 130px; }
-      #theme-btn:hover, #download-btn:hover, #batch-save-btn:hover {
-        background-color: #555;
+      #theme-btn:hover, #download-btn:hover, #search-btn:hover, #batch-save-btn:hover {
+        background-color: #555555;
       }
       .dark-theme #theme-btn, .dark-theme #download-btn, .dark-theme #search-btn, .dark-theme #batch-save-btn {
         background-color: #b32318;
       }
-      .dark-theme #theme-btn:hover, .dark-theme #download-btn:hover, .dark-theme #search-btn:hover, . .dark-theme #batch-save-btn:hover {
-        background-color: #8e1200;
-      }
+      .dark-theme #theme-btn:hover, .dark-theme #download-btn:hover, .dark-theme #search-btn:hover, .dark-theme #batch-save-btn:hover {
+        background-color: #8e1c13;
       }
       img {
-        max-width: auto 100%;
+        max-width: 100%;
         height: auto;
         display: block;
       }
@@ -161,12 +155,12 @@
       .dark-theme .image-error {
         color: #ff9999;
       }
-      .container {
+      #loading {
         font-size: 14pt;
         margin-top: 10px;
         display: none;
       }
-      .dark-theme #display {
+      .dark-theme #loading {
         color: #ffffff;
       }
       #sku-input {
@@ -174,32 +168,27 @@
         margin: 0 5px;
         padding: 5px;
         width: 100px;
-        text-align: center;      }
+        text-align: center;
       }
       .dark-theme #sku-input {
         color: #ffffff;
         background-color: #333333;
         border: 1px solid #ffffff;
       }
-      #checked-sku, #valid-skipped-SKUs {
-      font-size: 14pt;
-      font-size: 12pt;
-      margin-top:      margin-bottom: 10px;
-      max-width:      max-width: 600px;
-      margin-left: auto;
-      margin-right: auto;
-      word-wrap: break-word;
+      #checked-skus, #valid-skus-range {
+        font-size: 12pt;
+        margin-top: 10px;
+        max-width: 600px;
+        margin-left: auto;
+        margin-right: auto;
+        word-wrap: break-word;
       }
-    }
-      .dark-theme #checked-sku, .dark-theme #valid-skipped-SKUs {
-      color: #ffffff;
+      .dark-theme #checked-skus, .dark-theme #valid-skus-range {
+        color: #ffffff;
       }
-    }
-    .dark-theme h1,
-      .dark-theme h2 {
-      color: #ffffff;
+      .dark-theme h1, .dark-theme h2 {
+        color: #ffffff;
       }
-    }
       #cancel-btn {
         display: none;
       }
