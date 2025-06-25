@@ -43,7 +43,7 @@
         margin-top: 0;
       }
       .dark-theme {
-        background: #333333 url('/images/background_e8.jpg') no-repeat center center fixed;
+        background: #333333 var(--background-image, url('/images/background_e8.jpg')) no-repeat center center fixed;
         background-size: cover;
         color: #ffffff;
       }
@@ -290,6 +290,20 @@
         background-color: rgba(0, 0, 0, 0.5);
         z-index: 999;
       }
+      #theme-label {
+        position: absolute;
+        top: 40px;
+        right: 10px;
+        font-size: 10pt;
+        color: #333333;
+        background-color: rgba(255, 255, 255, 0.8);
+        padding: 2px 5px;
+        border-radius: 3px;
+      }
+      .dark-theme #theme-label {
+        color: #ffffff;
+        background-color: rgba(0, 0, 0, 0.8);
+      }
     </style>
   </head>
   <body>
@@ -298,7 +312,8 @@
       <button id="batch-save-btn" class="btn" aria-label="Batch save SKUs"><i class="fas fa-save"></i></button>
       <button id="search-btn" class="btn" aria-label="Search IFSTA for SKU"><i class="fas fa-globe"></i></button>
       <button id="download-btn" class="btn" aria-label="Download PNG images as ZIP"><i class="fas fa-cloud-arrow-down"></i></button>
-      <button id="theme-btn" class="btn" aria-label="Switch to dark theme"><i class="fas fa-paint-brush"></i></button>
+      <button id="theme-btn" class="btn" aria-label="Switch to next background"><i class="fas fa-paint-brush"></i></button>
+      <span id="theme-label"></span>
       <!-- Batch Save Modal -->
       <div class="modal-overlay" id="batch-modal-overlay"></div>
       <div class="batch-modal" id="batch-modal">
@@ -343,6 +358,12 @@
         fetchTimeout: 10000
       };
       
+      const backgrounds = [
+        { name: "Default", url: "/images/background_e8.jpg" },
+        { name: "Alternative 1", url: "/images/background_alt1.jpg" },
+        { name: "Alternative 2", url: "/images/background_alt2.jpg" }
+      ];
+      
       const themeBtn = document.getElementById("theme-btn");
       const downloadBtn = document.getElementById("download-btn");
       const searchBtn = document.getElementById("search-btn");
@@ -369,6 +390,7 @@
       const tableContainer = document.getElementById("tableID");
       const checkedSKUsDisplay = document.getElementById("checked-skus");
       const validSKUsRangeDisplay = document.getElementById("valid-skus-range");
+      const themeLabel = document.getElementById("theme-label");
       
       let testedSKUs = JSON.parse(localStorage.getItem("testedSKUs")) || [];
       let validSKUs = JSON.parse(localStorage.getItem("validSKUs")) || [];
@@ -380,12 +402,13 @@
       let scanCount = 0;
       const maxScanAttempts = 100;
       let showAllSizes = false;
-      let isDarkTheme = false;
+      let currentBackgroundIndex = parseInt(localStorage.getItem("currentBackgroundIndex")) || 0;
       
       skuInput.value = currentSKU;
       updateCheckedSKUsDisplay();
       updateValidSKUsRange();
       updateInteriorButtonState();
+      updateTheme();
       
       themeBtn.addEventListener("click", toggleTheme);
       downloadBtn.addEventListener("click", downloadImagesAsZip);
@@ -408,6 +431,19 @@
       cancelBtn.addEventListener("click", cancelScan);
       
       displayImages(currentSKU);
+      
+      function toggleTheme() {
+        currentBackgroundIndex = (currentBackgroundIndex + 1) % backgrounds.length;
+        localStorage.setItem("currentBackgroundIndex", currentBackgroundIndex);
+        updateTheme();
+      }
+      
+      function updateTheme() {
+        document.body.classList.toggle("dark-theme", currentBackgroundIndex !== 0);
+        document.documentElement.style.setProperty('--background-image', `url('${backgrounds[currentBackgroundIndex].url}')`);
+        themeBtn.setAttribute("aria-label", `Switch to ${backgrounds[(currentBackgroundIndex + 1) % backgrounds.length].name} background`);
+        themeLabel.textContent = `Theme: ${backgrounds[currentBackgroundIndex].name}`;
+      }
       
       function toggleBatchModal() {
         batchModal.style.display = "block";
@@ -586,12 +622,6 @@
           errorMessage.style.display = "block";
           closeBatchModal();
         }
-      }
-      
-      function toggleTheme() {
-        isDarkTheme = !isDarkTheme;
-        document.body.classList.toggle("dark-theme");
-        themeBtn.setAttribute("aria-label", isDarkTheme ? "Switch to light theme" : "Switch to dark theme");
       }
       
       function toggleSizes() {
