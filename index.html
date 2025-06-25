@@ -13,7 +13,7 @@
     <link rel="manifest" href="/icons/site.webmanifest">
     <style>
       html, body {
-        font-family: system-ui;
+        font-family: Arial, sans-serif;
         margin: 0;
         padding: 0;
         text-align: center;
@@ -21,219 +21,188 @@
         color: #000000;
         min-height: 100vh;
       }
-      
       body {
         display: flex;
         flex-direction: column;
         min-height: 100vh;
       }
-      
-      main {
-        flex: 1 0 auto;
+      .container {
+        flex: auto 1;
       }
-      
       footer {
         flex-shrink: 0;
         font-size: 12pt;
         text-align: center;
         padding: 10px;
-        color: #000000;
+        color: #333333;
       }
-      
       .dark-theme footer {
         color: #ffffff;
       }
-      
       h1 {
         margin-top: 0;
       }
-      
       .dark-theme {
-        background: url('https://auth.ifsta.org/images/background_e8.jpg') no-repeat center center fixed;
+        background: url('https://auth.example.com/images/background.jpg') no-repeat center center fixed;
         background-size: cover;
         color: #ffffff;
       }
-      
-      #formID {
-        font-size: 16pt;
+      #container {
+        font-size: 32px;
         margin: 20px 0;
       }
-      
       .img-container {
         display: flex;
         justify-content: center;
         flex-wrap: wrap;
       }
-      
-      .inner-card {
+      .item {
         display: inline-block;
-        text-align: center;
-        background-color: #abebff;
         margin: 10px;
         padding: 10px;
+        background-color: #abebff;
+        text-align: center;
       }
-      
-      .dark-theme .inner-card {
+      .dark-theme .item {
         background-color: #cbccce;
       }
-      
-      .inner-card h3 {
-        color: #000000;
+      .item h2 {
+        color: #333333;
       }
-      
       #error-message {
         color: red;
-        font-size: 14pt;
+        font-size: bold 14pt;
         margin-top: 10px;
         display: none;
       }
-      
       .dark-theme #error-message {
         color: #ff9999;
       }
-      
       .btn {
         font-size: 14pt;
         margin: 0 5px;
-        padding: 5px 15px;
+        padding: 4px 15px;
         cursor: pointer;
         background-color: #007bff;
         color: white;
         border: none;
         border-radius: 5px;
       }
-      
       .btn:hover {
         background-color: #0056b3;
       }
-      
       .dark-theme .btn {
         background-color: #b32318;
       }
-      
       .dark-theme .btn:hover {
-        background-color: #8e1c13;
+        background-color: #8e1200;
       }
-      
       .btn:disabled {
         background-color: #cccccc;
-        cursor: not-allowed;
-        color: #666666;
+        cursor: none-allowed;
+        color: #666666;      }
       }
-      
       .dark-theme .btn:disabled {
         color: #999999;
       }
-      
+      }
       #cancel-btn {
         background-color: #dc3545;
       }
-      
-      .dark-theme #cancel-btn {
+      }
+      .dark-theme .cancel-btn {
         background-color: #b32318;
       }
-      
+      }
       #cancel-btn:hover {
         background-color: #c82333;
       }
-      
-      .dark-theme #cancel-btn:hover {
-        background-color: #8e1c13;
       }
-      
+      .dark-theme #cancel-btn:hover {
+        background-color: #8e1200;
+      }
+      }
       #theme-btn, #download-btn, #search-btn, #batch-save-btn {
         position: absolute;
         top: 10px;
-        background-color: #17a2b8;
+        background-color: #333333;
         font-size: 12pt;
         padding: 8px;
+        display: inline-block; /* Always visible */
       }
-      
+      }
       #theme-btn { right: 10px; }
       #download-btn { right: 50px; }
       #search-btn { right: 90px; }
       #batch-save-btn { right: 130px; }
-      
-      #theme-btn:hover, #download-btn:hover, #search-btn:hover, #batch-save-btn:hover {
-        background-color: #138496;
+      #theme-btn:hover, #download-btn:hover, #batch-save-btn:hover {
+        background-color: #555;
       }
-      
       .dark-theme #theme-btn, .dark-theme #download-btn, .dark-theme #search-btn, .dark-theme #batch-save-btn {
         background-color: #b32318;
       }
-      
-      .dark-theme #theme-btn:hover, .dark-theme #download-btn:hover, .dark-theme #search-btn:hover, .dark-theme #batch-save-btn:hover {
-        background-color: #8e1c13;
+      .dark-theme #theme-btn:hover, .dark-theme #download-btn:hover, .dark-theme #search-btn:hover, . .dark-theme #batch-save-btn:hover {
+        background-color: #8e1200;
       }
-      
+      }
       img {
-        max-width: 100%;
+        max-width: auto 100%;
         height: auto;
         display: block;
       }
-      
       .default-image {
         max-width: 400px;
       }
-      
       .image-error {
         color: red;
         font-size: 12pt;
         margin: 10px 0;
       }
-      
       .dark-theme .image-error {
         color: #ff9999;
       }
-      
-      #loading {
+      .container {
         font-size: 14pt;
         margin-top: 10px;
         display: none;
       }
-      
-      .dark-theme #loading {
+      .dark-theme #display {
         color: #ffffff;
       }
-      
       #sku-input {
-        font-size: 16pt;
+        font-size: 14pt;
         margin: 0 5px;
         padding: 5px;
         width: 100px;
-        text-align: center;
-        color: #000000;
+        text-align: center;      }
       }
-      
       .dark-theme #sku-input {
         color: #ffffff;
         background-color: #333333;
         border: 1px solid #ffffff;
       }
-      
-      #checked-skus, #valid-skus-range {
-        font-size: 14pt;
-        margin-top: 10px;
-        max-width: 600px;
-        margin-left: auto;
-        margin-right: auto;
-        word-wrap: break-word;
+      #checked-sku, #valid-skipped-SKUs {
+      font-size: 14pt;
+      font-size: 12pt;
+      margin-top:      margin-bottom: 10px;
+      max-width:      max-width: 600px;
+      margin-left: auto;
+      margin-right: auto;
+      word-wrap: break-word;
       }
-      
-      .dark-theme #checked-skus,
-      .dark-theme #valid-skus-range {
-        color: #ffffff;
+    }
+      .dark-theme #checked-sku, .dark-theme #valid-skipped-SKUs {
+      color: #ffffff;
       }
-      
-      .dark-theme h1,
+    }
+    .dark-theme h1,
       .dark-theme h2 {
-        color: #ffffff;
+      color: #ffffff;
       }
-      
+    }
       #cancel-btn {
         display: none;
       }
-      
       /* Batch Save Modal Styles */
       .batch-modal {
         display: none;
@@ -249,21 +218,17 @@
         width: 300px;
         text-align: left;
       }
-      
       .dark-theme .batch-modal {
         background-color: #333333;
         color: #ffffff;
       }
-      
       .batch-modal h3 {
         margin-top: 0;
         color: #000000;
       }
-      
       .dark-theme .batch-modal h3 {
         color: #ffffff;
       }
-      
       #batch-sku-input {
         width: 100%;
         padding: 5px;
@@ -271,19 +236,16 @@
         font-size: 12pt;
         color: #000000;
       }
-      
       .dark-theme #batch-sku-input {
         color: #ffffff;
         background-color: #444444;
         border: 1px solid #ffffff;
       }
-      
       #batch-sku-list {
         max-height: 150px;
         overflow-y: auto;
         margin-bottom: 10px;
       }
-      
       .batch-sku-item {
         display: flex;
         justify-content: space-between;
@@ -291,15 +253,12 @@
         padding: 5px;
         border-bottom: 1px solid #cccccc;
       }
-      
       .dark-theme .batch-sku-item {
         border-bottom: 1px solid #666666;
       }
-      
       .batch-sku-item span {
         font-size: 12pt;
       }
-      
       .batch-sku-item button {
         background-color: #dc3545;
         color: white;
@@ -309,36 +268,29 @@
         border-radius: 3px;
         font-size: 10pt;
       }
-      
       .batch-sku-item button:hover {
         background-color: #c82333;
       }
-      
       .dark-theme .batch-sku-item button {
         background-color: #b32318;
       }
-      
       .dark-theme .batch-sku-item button:hover {
         background-color: #8e1c13;
       }
-      
       .batch-modal .btn {
         font-size: 12pt;
         padding: 5px 10px;
         margin-right: 5px;
       }
-      
       #batch-error {
         color: red;
         font-size: 10pt;
         margin-bottom: 10px;
         display: none;
       }
-      
       .dark-theme #batch-error {
         color: #ff9999;
       }
-      
       .modal-overlay {
         display: none;
         position: fixed;
@@ -549,7 +501,7 @@
       async function downloadBatchImagesAsZip() {
         console.log(`Starting batch download for SKUs: ${batchSKUs.join(", ")}`);
         if (batchSKUs.length === 0) {
-          console.warn('No SKUs in batch list');
+          console.warn("No SKUs in batch list");
           batchError.textContent = "Error: No SKUs added for batch download.";
           batchError.style.display = "block";
           return;
@@ -565,6 +517,7 @@
         const zip = new JSZip();
         let hasImages = false;
         const missingImages = [];
+        const missingSKUs = [];
         const downloadedSKUs = [...batchSKUs];
         
         for (const sku of batchSKUs) {
@@ -572,7 +525,7 @@
           let skuHasImages = false;
           for (const size of section.sizes) {
             const type = ".png";
-            const url = `/api/fetch-image?sku=${sku}&size=${encodeURIComponent(size)}&type=${encodeURIComponent(type)}`;
+            const url = `/api/fetch-image?sku=${sku}&size=${size}&type=${type}`;
             const fileName = `${sku}_${size}${type}`;
             
             try {
@@ -613,7 +566,6 @@
         }
         
         console.log(`Batch fetch complete. Has images: ${hasImages}, Missing images: ${missingImages.join(", ")}`);
-        closeBatchModal(); // Move after fetching
         loading.style.display = "none";
         batchDownloadBtn.disabled = false;
         batchAddBtn.disabled = false;
@@ -622,13 +574,13 @@
           console.error(`No images found for SKUs: ${downloadedSKUs.join(", ")}`);
           errorMessage.textContent = `Error: No PNG images found for SKUs: ${downloadedSKUs.join(", ")}. Missing: ${missingImages.join(", ")}`;
           errorMessage.style.display = "block";
+          closeBatchModal();
           return;
         }
         
         try {
-          console.log('Generating ZIP file');
-          batchSKUs = []; // Clear after successful fetch
-          updateBatchSKUList();
+          console.log("Generating ZIP file");
+          closeBatchModal(); // Clear after fetching
           const content = await zip.generateAsync({ type: "blob" });
           saveAs(content, `batch_skus_${Date.now()}.zip`);
           console.log(`ZIP generated successfully for SKUs: ${downloadedSKUs.join(", ")}`);
@@ -643,6 +595,7 @@
           console.error(`Error generating ZIP: ${error.message}`);
           errorMessage.textContent = `Error: Failed to generate batch ZIP file: ${error.message}`;
           errorMessage.style.display = "block";
+          closeBatchModal();
         }
       }
       
@@ -657,14 +610,11 @@
         sizesBtn.textContent = showAllSizes ? "Hide Sizes" : "Sizes";
         sizesBtn.setAttribute("aria-expanded", showAllSizes);
         sizesBtn.setAttribute("aria-label", showAllSizes ? "Hide additional image sizes" : "Show additional image sizes");
-        downloadBtn.style.display = showAllSizes ? "inline-block" : "none";
-        searchBtn.style.display = showAllSizes ? "inline-block" : "none";
-        batchSaveBtn.style.display = showAllSizes ? "inline-block" : "none";
         displayImages(currentSKU);
       }
       
       function searchIFSTA() {
-        const searchUrl = `https://www.ifsta.org/shop/search?search_block_form=${encodeURIComponent(currentSKU)}`;
+        const searchUrl = `https://www.ifsta.org/shop/search?search_block_form=${currentSKU}`;
         window.open(searchUrl, '_blank');
       }
       
@@ -680,7 +630,7 @@
         
         for (const size of section.sizes) {
           const type = ".png";
-          const url = `/api/fetch-image?sku=${encodeURIComponent(currentSKU)}&size=${encodeURIComponent(size)}&type=${encodeURIComponent(type)}`;
+          const url = `/api/fetch-image?sku=${currentSKU}&size=${size}&type=${type}`;
           const fileName = `${currentSKU}_${size}${type}`;
           
           try {
@@ -780,6 +730,8 @@
         errorMessage.style.display = "none";
         errorMessage.textContent = "";
         loading.style.display = "block";
+        tableContainer.innerHTML = "";
+        
         console.log(`Starting scan from SKU ${currentSKU}, direction ${direction}, testedSKUs: ${testedSKUs.join(", ")}`);
         
         try {
@@ -899,7 +851,7 @@
         
         if (candidates.length === 0) {
           loading.style.display = "none";
-          errorMessage.textContent = `No more known SKUs with images in this direction. Use exterior arrows to navigate.`;
+          errorMessage.textContent = `No more known SKUs with images in this direction. Use exterior arrows to find more.`;
           errorMessage.style.display = "block";
           console.log(`No more valid SKUs in direction ${direction}`);
           return;
@@ -932,7 +884,7 @@
       }
       
       async function checkImages(sku, signal) {
-        const urls = [`/api/fetch-image?sku=${encodeURIComponent(sku)}&size=100&type=.png`];
+        const urls = [`/api/fetch-image?sku=${sku}&size=100&type=.png`];
         let hasImages = false;
         
         for (const url of urls) {
@@ -956,11 +908,11 @@
                     hasImages = true;
                   } else {
                     console.log(`Invalid response for ${url}: Not base64 encoded`);
-                    hasImages = true;
+                    hasImages = false;
                   }
                 } catch (error) {
                   console.error(`Error parsing JSON for ${url}: ${error.message}`);
-                  hasImages = true;
+                  hasImages = false;
                 }
               } else if ([429, 503].includes(response.status)) {
                 console.log(`Retrying ${url}: Status ${response.status}`);
@@ -1021,10 +973,10 @@
             const heading = `${size}${type}`;
             innerCard.innerHTML += `<h3>${heading}</h3>`;
             
-            const imgSrc = `/api/fetch-image?sku=${encodeURIComponent(sku)}&size=${encodeURIComponent(size)}&type=${encodeURIComponent(type)}`;
+            const imgSrc = `/api/fetch-image?sku=${sku}&size=${size}&type=${type}`;
             const img = document.createElement("img");
             img.alt = `${heading} for SKU ${sku}`;
-            img.classList.add("image-default");
+            img.classList.add("default-image");
             
             try {
               const response = await fetch(imgSrc, { method: 'GET' });
@@ -1099,7 +1051,7 @@
             };
             
             if (img.src) {
-                innerCard.appendChild(img);
+              innerCard.appendChild(img);
             }
           }
         }
@@ -1107,35 +1059,34 @@
       
       function updateCheckedSKUsDisplay() {
         if (testedSKUs.length === 0) {
-          checkedSKUsDisplay.textContent = "Checked SKUs";
-        }
-        else {
-          checkedSKUsDisplay.textContent = `Checked SKUs: ${testedSKUs.join(", ")}`;
+          checkedSKUsDisplay.textContent = "Checked SKUs (no images): None";
+        } else {
+          checkedSKUsDisplay.textContent = `Checked SKUs (no images): ${testedSKUs.join(", ")}`;
         }
       }
       
       function updateValidSKUsRange() {
         if (validSKUs.length === 0) {
-          validSKUsRangeDisplay.textContent = "Known SKUs: None";
-        }
-        else {
-          const sortedSKUs = validSKUs.sort((a, b) => skuToNumber(a) - b);
-          validSKUsRangeDisplay.textContent = `Known SKUs: Min: ${sortedSKUs[0]}, Max: ${sortedSKUs[sortedSKUs.length - 1]}`;
+          validSKUsRangeDisplay.textContent = "Known SKUs with images: None";
+        } else {
+          const sortedSKUs = validSKUs.sort((a, b) => skuToNumber(a) - skuToNumber(b));
+          validSKUsRangeDisplay.textContent = `Known SKUs with images: Min: ${sortedSKUs[0]}, Max: ${sortedSKUs[sortedSKUs.length - 1]}`;
         }
       }
       
-      function updateInteriorButtonState {
-        prevInteriorBtn.disabled = validSKUs.length === 0 ? true;
-        nextInteriorBtn.disabled = validSKUs.length === 0 ? true;
+      function updateInteriorButtonState() {
+        prevInteriorBtn.disabled = validSKUs.length === 0;
+        nextInteriorBtn.disabled = validSKUs.length === 0;
       }
       
       function clearForm() {
         skuInput.value = "00000";
         currentSKU = "00000";
+        localStorage.setItem("currentSKU", currentSKU);
         errorMessage.style.display = "none";
         errorMessage.textContent = "";
         loading.style.display = "none";
-        cancelBtn.disabled.display = "none";
+        cancelBtn.style.display = "none";
         tableContainer.innerHTML = "";
         testedSKUs = [];
         validSKUs = [];
@@ -1145,17 +1096,14 @@
         showAllSizes = false;
         sizesBtn.textContent = "Sizes";
         sizesBtn.setAttribute("aria-expanded", "false");
-        sizesBtn.disabled = "aria-label", "Show additional sizes";
-        downloadBtn.disabled = true;
-        searchBtn.style.display = "none";
-        batchSaveBtn.disabled = true;
+        sizesBtn.setAttribute("aria-label", "Show additional image sizes");
         if (abortController) {
           abortController.abort();
-          abortController.signal = null;
+          abortController = null;
         }
         updateCheckedSKUsDisplay();
         updateValidSKUsRange();
-        updateInteriorButtonsState();
+        updateInteriorButtonState();
       }
       
       function cancelScan() {
@@ -1165,18 +1113,16 @@
         isScanning = false;
         cancelBtn.style.display = "none";
         prevExteriorBtn.disabled = false;
-        nextExteriorBtn.disabled = true;
+        nextExteriorBtn.disabled = false;
         loading.style.display = "none";
-      errorMessage.style = "none";
-      errorMessage.textContent = "";
-      currentSKU = lastSKU;
-      skuInput.value = currentSKU;
-      localStorage.setItem("currentSKU", currentSKU);
-      console.log(`Scan cancelled, reverting to SKU ${currentSKU}`);
-      displayImages(currentSKU);
+        errorMessage.style.display = "none";
+        errorMessage.textContent = "";
+        currentSKU = lastSKU;
+        skuInput.value = currentSKU;
+        localStorage.setItem("currentSKU", currentSKU);
+        console.log(`Scan cancelled, reverting to SKU ${currentSKU}`);
+        displayImages(currentSKU);
       }
-    }
-    
     </script>
-    </body>
+  </body>
 </html>
