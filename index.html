@@ -43,7 +43,7 @@
         margin-top: 0;
       }
       .dark-theme {
-        background: #333333 var(--background-image, url('/images/background_e8.jpg')) no-repeat center center fixed;
+        background: #333333 var(--background-image, none) no-repeat center center fixed;
         background-size: cover;
         color: #ffffff;
       }
@@ -359,9 +359,10 @@
       };
       
       const backgrounds = [
-        { name: "Default", url: "/images/background_e8.jpg" },
+        { name: "Default", url: "" },
         { name: "Alternative 1", url: "/images/background_alt1.jpg" },
-        { name: "Alternative 2", url: "/images/background_alt2.jpg" }
+        { name: "Alternative 2", url: "/images/background_alt2.jpg" },
+        { name: "Alternative 3", url: "/images/background_e8.jpg" }
       ];
       
       const themeBtn = document.getElementById("theme-btn");
@@ -439,8 +440,10 @@
       }
       
       function updateTheme() {
-        document.body.classList.toggle("dark-theme", currentBackgroundIndex !== 0);
-        document.documentElement.style.setProperty('--background-image', `url('${backgrounds[currentBackgroundIndex].url}')`);
+        const isDarkTheme = currentBackgroundIndex !== 0;
+        document.body.classList.toggle("dark-theme", isDarkTheme);
+        const bgUrl = backgrounds[currentBackgroundIndex].url ? `url('${backgrounds[currentBackgroundIndex].url}')` : 'none';
+        document.documentElement.style.setProperty('--background-image', bgUrl);
         themeBtn.setAttribute("aria-label", `Switch to ${backgrounds[(currentBackgroundIndex + 1) % backgrounds.length].name} background`);
         themeLabel.textContent = `Theme: ${backgrounds[currentBackgroundIndex].name}`;
       }
