@@ -6,13 +6,11 @@
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>ImageScraper by Tate</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
-    <!-- Favicon and Manifest -->
     <link rel="icon" href="/icons/favicon.ico" type="image/x-icon" sizes="16x16 32x32">
     <link rel="icon" type="image/png" sizes="16x16" href="/icons/favicon-16x16.png">
     <link rel="icon" type="image/png" sizes="32x32" href="/icons/favicon-32x32.png">
     <link rel="apple-touch-icon" sizes="180x180" href="/icons/apple-touch-icon.png">
     <link rel="manifest" href="/icons/site.webmanifest">
-    <meta name="theme-color" content="#ffffff">
     <style>
       html, body {
         font-family: system-ui;
@@ -390,7 +388,7 @@
       <div id="checked-skus">Checked SKUs (no images): None</div>
       <div id="valid-skus-range">Known SKUs with images: None</div>
     </main>
-    <footer id="footer" aria-label="IFSTA Copyright 2025">IFSTA © 2025</footer>
+    <footer id="footer" aria-label="IFSTA Copyright 2025">IFSTA © 2025 https://github.com/aaronfpp/image-scraper</footer>
     
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
@@ -433,7 +431,7 @@
       
       let testedSKUs = JSON.parse(localStorage.getItem("testedSKUs")) || [];
       let validSKUs = JSON.parse(localStorage.getItem("validSKUs")) || [];
-      let batchSKUs = []; // Temporary array for batch download
+      let batchSKUs = [];
       let currentSKU = localStorage.getItem("currentSKU") && section.validationRegex.test(localStorage.getItem("currentSKU")) ? localStorage.getItem("currentSKU") : "00000";
       let isScanning = false;
       let abortController = null;
@@ -460,13 +458,13 @@
       prevExteriorBtn.addEventListener("click", () => navigateSKU(-1));
       nextExteriorBtn.addEventListener("click", () => navigateSKU(1));
       prevInteriorBtn.addEventListener("click", () => navigateValidSKU(-1));
-      nextBtn.addEventListener("click", () => navigateValidSKU(1));
-      submitBtn.addEventListener("click", () => submitSKU);
+      nextInteriorBtn.addEventListener("click", () => navigateValidSKU(1));
+      submitBtn.addEventListener("click", submitSKU);
       skuInput.addEventListener("keypress", (e) => {
         if (e.key === "Enter") submitSKU();
       });
       clearBtn.addEventListener("click", clearForm);
-      cancelBtn.addEventListener("click", () => cancelScan);
+      cancelBtn.addEventListener("click", cancelScan);
       
       displayImages(currentSKU);
       
@@ -484,10 +482,12 @@
         batchSKUInput.value = "";
         batchError.style.display = "none";
         batchError.textContent = "";
+        batchSKUs = []; // Clear batch on close
+        updateBatchSKUList();
         batchSaveBtn.disabled = false;
       }
       
-      function addBatchSKUs() {
+      function addBatchSKU() {
         const sku = batchSKUInput.value.trim();
         batchError.style.display = "none";
         batchError.textContent = "";
@@ -519,35 +519,40 @@
       }
       
       function updateBatchSKUList() {
-          batchSKUList.innerHTML = "";
-          batchDownloadBtn.disabled = batchSKUs.length === 0;
-          if (batchSKUs.length === 0) {
-              const emptyItem = document.createElement("div");
-              emptyItem.textContent = "No SKUs added.";
-              emptyItem.style.fontSize = "12pt";
-              emptyItem.style.padding = "24px";
-              batchSKUList.appendChild(emptyItem);
-              return;
-          }
-          batchSKUs.forEach((sku, index) => {
-              const item = document.createElement("div");
-              item.className = "batch-sku-item";
-              const skuText = document.createElement("span");
-              skuText.textContent = sku;
-              const removeBtn = document.createElement("button");
-              removeBtn.textContent = "Remove";
-              removeBtn.dataset.index = index;
-              removeBtn.addEventListener("click", () => {
-                  batchSKUs.splice(index, 1);
-                  updateBatchSKUList();
-              });
-              item.appendChild(skuText);
-              item.appendChild(removeBtn);
-              batchSKUList.appendChild(item);
+        batchSKUList.innerHTML = "";
+        batchDownloadBtn.disabled = batchSKUs.length === 0;
+        if (batchSKUs.length === 0) {
+          const emptyItem = document.createElement("div");
+          emptyItem.textContent = "No SKUs added.";
+          emptyItem.style.fontSize = "12pt";
+          emptyItem.style.padding = "5px";
+          batchSKUList.appendChild(emptyItem);
+          return;
+        }
+        batchSKUs.forEach((sku, index) => {
+          const item = document.createElement("div");
+          item.className = "batch-sku-item";
+          const skuText = document.createElement("span");
+          skuText.textContent = sku;
+          const removeBtn = document.createElement("button");
+          removeBtn.textContent = "Remove";
+          removeBtn.addEventListener("click", () => {
+            batchSKUs.splice(index, 1);
+            updateBatchSKUList();
           });
+          item.appendChild(skuText);
+          item.appendChild(removeBtn);
+          batchSKUList.appendChild(item);
+        });
       }
       
       async function downloadBatchImagesAsZip() {
+        if (batchSKUs.length === 0) {
+          batchError.textContent = "Error: No SKUs added for batch download.";
+          batchError.style.display = "block";
+          return;
+        }
+        
         batchDownloadBtn.disabled = true;
         batchAddBtn.disabled = true;
         batchError.style.display = "none";
@@ -580,7 +585,8 @@
                   zip.file(fileName, bytes);
                   hasImages = true;
                 } else {
-                  throw new Error('Response is not base64 encoded');
+                  missingImages.push(`${sku}-${size}${type}`);
+                  console.log(`Batch failed to fetch ${url}: Not base64 encoded`);
                 }
               } else {
                 missingImages.push(`${sku}-${size}${type}`);
@@ -604,10 +610,12 @@
         }
         
         try {
+          const downloadedSKUs = [...batchSKUs]; // Store for success message
+          batchSKUs = []; // Clear batch after download
+          updateBatchSKUList();
           const content = await zip.generateAsync({ type: "blob" });
           saveAs(content, `batch_skus_images.zip`);
-          batchSKUs = []; // Clear batch after download
-          errorMessage.textContent = `Success: Batch download complete for SKUs: ${batchSKUs.join(", ")}.`;
+          errorMessage.textContent = `Success: Batch download complete for SKUs: ${downloadedSKUs.join(", ")}.`;
           errorMessage.style.display = "block";
           setTimeout(() => errorMessage.style.display = "none", 3000);
           if (missingImages.length > 0) {
@@ -634,7 +642,7 @@
         sizesBtn.setAttribute("aria-label", showAllSizes ? "Hide additional image sizes" : "Show additional image sizes");
         downloadBtn.style.display = showAllSizes ? "inline-block" : "none";
         searchBtn.style.display = showAllSizes ? "inline-block" : "none";
-        batchBtn.style.display = showAllSizes ? "inline-block" : "none";
+        batchSaveBtn.style.display = showAllSizes ? "inline-block" : "none";
         displayImages(currentSKU);
       }
       
@@ -717,7 +725,7 @@
         errorMessage.textContent = "";
         loading.style.display = "block";
         tableContainer.innerHTML = "";
-        testedSKUs = []; // Reset testedSKUs on manual submission
+        testedSKUs = [];
         localStorage.setItem("testedSKUs", JSON.stringify(testedSKUs));
         checkedSKUsDisplay.textContent = "Checked SKUs (no images): None";
         
@@ -749,7 +757,6 @@
         cancelBtn.style.display = "inline-block";
         scanCount = 0;
         
-        // Disable navigation buttons during scan
         prevExteriorBtn.disabled = true;
         nextExteriorBtn.disabled = true;
         
@@ -765,9 +772,9 @@
         } catch (error) {
           console.error(`Scan error: ${error.message}`);
           isScanning = false;
-          cancelBtn.disabled = "none";
+          cancelBtn.style.display = "none";
           prevExteriorBtn.disabled = false;
-          nextBtn.disabled = false;
+          nextExteriorBtn.disabled = false;
           testedSKUs = [];
           localStorage.setItem("testedSKUs", JSON.stringify(testedSKUs));
           checkedSKUsDisplay.textContent = "Checked SKUs (no images): None";
@@ -837,7 +844,6 @@
           }
           console.log(`Found valid SKU ${nextSKU}, displaying images`);
           displayImages(currentSKU);
-          // Reset scan state
           isScanning = false;
           cancelBtn.style.display = "none";
           prevExteriorBtn.disabled = false;
@@ -859,14 +865,15 @@
         if (validSKUs.length === 0) {
           errorMessage.style.display = "none";
           errorMessage.textContent = "Error: No valid SKUs with images found yet. Use exterior arrows to find some.";
-          errorMessage.style.display = true;"block";
+          errorMessage.style.display = "block";
+          loading.style.display = "none";
           console.log(`No valid SKUs for interior navigation`);
           return;
         }
         
         errorMessage.style.display = "none";
         errorMessage.textContent = "";
-        loading.style.display = true;"block";
+        loading.style.display = "block";
         tableContainer.innerHTML = "";
         
         const currentValue = skuToNumber(currentSKU);
@@ -919,12 +926,12 @@
           
           while (attempts < maxAttempts && !signal.aborted) {
             const timeoutController = new AbortController();
-            const timeoutId = setTimeout(() => timeoutController.signal(timeout), section.fetchTimeout);
+            const timeoutId = setTimeout(() => timeoutController.abort(), section.fetchTimeout);
             
             try {
               const response = await fetch(url, { 
                 method: 'GET', 
-                signal: AbortController.any([signal, timeoutController.signal])
+                signal: AbortSignal.any([signal, timeoutController.signal])
               });
               console.log(`Checking ${url}: Status ${response.status}, Attempt ${attempts + 1}`);
               if (response.ok) {
@@ -934,11 +941,11 @@
                     hasImages = true;
                   } else {
                     console.log(`Invalid response for ${url}: Not base64 encoded`);
-                    hasImages = true; // Assume valid if response is 200
+                    hasImages = true;
                   }
                 } catch (error) {
                   console.error(`Error parsing JSON for ${url}: ${error.message}`);
-                  hasImages = true; // Assume valid if response is 200 but JSON fails
+                  hasImages = true;
                 }
               } else if ([429, 503].includes(response.status)) {
                 console.log(`Retrying ${url}: Status ${response.status}`);
@@ -958,9 +965,9 @@
                 continue;
               } else if (error.name === "AbortError") {
                 clearTimeout(timeoutId);
-                throw error; // Manual abort
+                throw error;
               }
-              break; // Other errors
+              break;
             } finally {
               clearTimeout(timeoutId);
             }
@@ -1013,11 +1020,11 @@
                   img.src = `data:${data.contentType};base64,${data.body}`;
                   innerCard.appendChild(img);
                 } else {
-                throw new Error('Response is not base64 encoded');
+                  throw new Error('Response is not base64 encoded');
+                }
+              } else {
+                throw new Error(`Status ${response.status}`);
               }
-            } else {
-              throw new Error(`Status ${response.status}`);
-            }
             } catch (error) {
               failedImages++;
               missingImages.push(heading);
