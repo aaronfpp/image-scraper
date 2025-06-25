@@ -6,11 +6,13 @@
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>ImageScraper by Tate</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    <!-- Favicon and Manifest -->
     <link rel="icon" href="/icons/favicon.ico" type="image/x-icon" sizes="16x16 32x32">
-  <link rel="icon" type="image/png" sizes="16x16" href="/icons/favicon-16x16.png">
-  <link rel="icon" type="image/png" sizes="32x32" href="/icons/favicon-32x32.png">
-  <link rel="apple-touch-icon" sizes="180x180" href="/icons/apple-touch-icon.png">
-  <link rel="manifest" href="/icons/site.webmanifest">
+    <link rel="icon" type="image/png" sizes="16x16" href="/icons/favicon-16x16.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="/icons/favicon-32x32.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="/icons/apple-touch-icon.png">
+    <link rel="manifest" href="/icons/site.webmanifest">
+    <meta name="theme-color" content="#ffffff">
     <style>
       html, body {
         font-family: system-ui;
@@ -141,68 +143,28 @@
         background-color: #8e1c13;
       }
       
-      #theme-btn {
+      #theme-btn, #download-btn, #search-btn, #batch-save-btn {
         position: absolute;
         top: 10px;
-        right: 10px;
         background-color: #17a2b8;
         font-size: 12pt;
         padding: 8px;
       }
       
-      #theme-btn:hover {
+      #theme-btn { right: 10px; }
+      #download-btn { right: 50px; }
+      #search-btn { right: 90px; }
+      #batch-save-btn { right: 130px; }
+      
+      #theme-btn:hover, #download-btn:hover, #search-btn:hover, #batch-save-btn:hover {
         background-color: #138496;
       }
       
-      .dark-theme #theme-btn {
+      .dark-theme #theme-btn, .dark-theme #download-btn, .dark-theme #search-btn, .dark-theme #batch-save-btn {
         background-color: #b32318;
       }
       
-      .dark-theme #theme-btn:hover {
-        background-color: #8e1c13;
-      }
-      
-      #download-btn {
-        position: absolute;
-        top: 10px;
-        right: 50px;
-        background-color: #17a2b8;
-        font-size: 12pt;
-        padding: 8px;
-        display: none;
-      }
-      
-      #download-btn:hover {
-        background-color: #138496;
-      }
-      
-      .dark-theme #download-btn {
-        background-color: #b32318;
-      }
-      
-      .dark-theme #download-btn:hover {
-        background-color: #8e1c13;
-      }
-      
-      #search-btn {
-        position: absolute;
-        top: 10px;
-        right: 90px;
-        background-color: #17a2b8;
-        font-size: 12pt;
-        padding: 8px;
-        display: none;
-      }
-      
-      #search-btn:hover {
-        background-color: #138496;
-      }
-      
-      .dark-theme #search-btn {
-        background-color: #b32318;
-      }
-      
-      .dark-theme #search-btn:hover {
+      .dark-theme #theme-btn:hover, .dark-theme #download-btn:hover, .dark-theme #search-btn:hover, .dark-theme #batch-save-btn:hover {
         background-color: #8e1c13;
       }
       
@@ -273,13 +235,142 @@
       #cancel-btn {
         display: none;
       }
+      
+      /* Batch Save Modal Styles */
+      .batch-modal {
+        display: none;
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        background-color: #ffffff;
+        padding: 20px;
+        border-radius: 10px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        z-index: 1000;
+        width: 300px;
+        text-align: left;
+      }
+      
+      .dark-theme .batch-modal {
+        background-color: #333333;
+        color: #ffffff;
+      }
+      
+      .batch-modal h3 {
+        margin-top: 0;
+        color: #000000;
+      }
+      
+      .dark-theme .batch-modal h3 {
+        color: #ffffff;
+      }
+      
+      #batch-sku-input {
+        width: 100%;
+        padding: 5px;
+        margin-bottom: 10px;
+        font-size: 12pt;
+        color: #000000;
+      }
+      
+      .dark-theme #batch-sku-input {
+        color: #ffffff;
+        background-color: #444444;
+        border: 1px solid #ffffff;
+      }
+      
+      #batch-sku-list {
+        max-height: 150px;
+        overflow-y: auto;
+        margin-bottom: 10px;
+      }
+      
+      .batch-sku-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 5px;
+        border-bottom: 1px solid #cccccc;
+      }
+      
+      .dark-theme .batch-sku-item {
+        border-bottom: 1px solid #666666;
+      }
+      
+      .batch-sku-item span {
+        font-size: 12pt;
+      }
+      
+      .batch-sku-item button {
+        background-color: #dc3545;
+        color: white;
+        border: none;
+        padding: 2px 8px;
+        cursor: pointer;
+        border-radius: 3px;
+        font-size: 10pt;
+      }
+      
+      .batch-sku-item button:hover {
+        background-color: #c82333;
+      }
+      
+      .dark-theme .batch-sku-item button {
+        background-color: #b32318;
+      }
+      
+      .dark-theme .batch-sku-item button:hover {
+        background-color: #8e1c13;
+      }
+      
+      .batch-modal .btn {
+        font-size: 12pt;
+        padding: 5px 10px;
+        margin-right: 5px;
+      }
+      
+      #batch-error {
+        color: red;
+        font-size: 10pt;
+        margin-bottom: 10px;
+        display: none;
+      }
+      
+      .dark-theme #batch-error {
+        color: #ff9999;
+      }
+      
+      .modal-overlay {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.5);
+        z-index: 999;
+      }
     </style>
   </head>
   <body>
     <main>
+      <!-- Batch Save Button -->
+      <button id="batch-save-btn" class="btn" aria-label="Batch save SKUs"><i class="fas fa-save"></i></button>
       <button id="search-btn" class="btn" aria-label="Search IFSTA for SKU"><i class="fas fa-globe"></i></button>
       <button id="download-btn" class="btn" aria-label="Download PNG images as ZIP"><i class="fas fa-cloud-arrow-down"></i></button>
       <button id="theme-btn" class="btn" aria-label="Switch to dark theme"><i class="fas fa-paint-brush"></i></button>
+      <!-- Batch Save Modal -->
+      <div class="modal-overlay" id="batch-modal-overlay"></div>
+      <div class="batch-modal" id="batch-modal">
+        <h3>Batch Save SKUs</h3>
+        <input type="text" id="batch-sku-input" placeholder="Enter 5-digit SKU" aria-label="Enter SKU for batch download">
+        <div id="batch-error" aria-live="polite"></div>
+        <button id="batch-add-btn" class="btn" aria-label="Add SKU to batch">Add SKU</button>
+        <div id="batch-sku-list" aria-label="List of SKUs for batch download"></div>
+        <button id="batch-download-btn" class="btn" aria-label="Download batch SKUs as ZIP" disabled>Batch Download</button>
+        <button id="batch-cancel-btn" class="btn" aria-label="Cancel batch save">Cancel</button>
+      </div>
       <h1>Welcome to ImageScraper!</h1>
       <h2>By Tate</h2>
       <div id="formID">
@@ -299,7 +390,7 @@
       <div id="checked-skus">Checked SKUs (no images): None</div>
       <div id="valid-skus-range">Known SKUs with images: None</div>
     </main>
-    <footer id="footer" aria-label="IFSTA Copyright 2025">IFSTA © 2025 https://github.com/aaronfpp/image-scraper</footer>
+    <footer id="footer" aria-label="IFSTA Copyright 2025">IFSTA © 2025</footer>
     
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
@@ -316,6 +407,15 @@
       const themeBtn = document.getElementById("theme-btn");
       const downloadBtn = document.getElementById("download-btn");
       const searchBtn = document.getElementById("search-btn");
+      const batchSaveBtn = document.getElementById("batch-save-btn");
+      const batchModal = document.getElementById("batch-modal");
+      const batchModalOverlay = document.getElementById("batch-modal-overlay");
+      const batchSKUInput = document.getElementById("batch-sku-input");
+      const batchAddBtn = document.getElementById("batch-add-btn");
+      const batchDownloadBtn = document.getElementById("batch-download-btn");
+      const batchCancelBtn = document.getElementById("batch-cancel-btn");
+      const batchSKUList = document.getElementById("batch-sku-list");
+      const batchError = document.getElementById("batch-error");
       const sizesBtn = document.getElementById("sizes-btn");
       const prevExteriorBtn = document.getElementById("prev-exterior-btn");
       const nextExteriorBtn = document.getElementById("next-exterior-btn");
@@ -331,9 +431,9 @@
       const checkedSKUsDisplay = document.getElementById("checked-skus");
       const validSKUsRangeDisplay = document.getElementById("valid-skus-range");
       
-      // Initialize SKU history from localStorage
       let testedSKUs = JSON.parse(localStorage.getItem("testedSKUs")) || [];
       let validSKUs = JSON.parse(localStorage.getItem("validSKUs")) || [];
+      let batchSKUs = []; // Temporary array for batch download
       let currentSKU = localStorage.getItem("currentSKU") && section.validationRegex.test(localStorage.getItem("currentSKU")) ? localStorage.getItem("currentSKU") : "00000";
       let isScanning = false;
       let abortController = null;
@@ -351,19 +451,175 @@
       themeBtn.addEventListener("click", toggleTheme);
       downloadBtn.addEventListener("click", downloadImagesAsZip);
       searchBtn.addEventListener("click", searchIFSTA);
+      batchSaveBtn.addEventListener("click", toggleBatchModal);
+      batchAddBtn.addEventListener("click", addBatchSKU);
+      batchDownloadBtn.addEventListener("click", downloadBatchImagesAsZip);
+      batchCancelBtn.addEventListener("click", closeBatchModal);
+      batchModalOverlay.addEventListener("click", closeBatchModal);
       sizesBtn.addEventListener("click", toggleSizes);
       prevExteriorBtn.addEventListener("click", () => navigateSKU(-1));
       nextExteriorBtn.addEventListener("click", () => navigateSKU(1));
       prevInteriorBtn.addEventListener("click", () => navigateValidSKU(-1));
-      nextInteriorBtn.addEventListener("click", () => navigateValidSKU(1));
-      submitBtn.addEventListener("click", submitSKU);
+      nextBtn.addEventListener("click", () => navigateValidSKU(1));
+      submitBtn.addEventListener("click", () => submitSKU);
       skuInput.addEventListener("keypress", (e) => {
         if (e.key === "Enter") submitSKU();
       });
       clearBtn.addEventListener("click", clearForm);
-      cancelBtn.addEventListener("click", cancelScan);
+      cancelBtn.addEventListener("click", () => cancelScan);
       
       displayImages(currentSKU);
+      
+      function toggleBatchModal() {
+        batchModal.style.display = "block";
+        batchModalOverlay.style.display = "block";
+        batchSKUInput.focus();
+        updateBatchSKUList();
+        batchSaveBtn.disabled = true;
+      }
+      
+      function closeBatchModal() {
+        batchModal.style.display = "none";
+        batchModalOverlay.style.display = "none";
+        batchSKUInput.value = "";
+        batchError.style.display = "none";
+        batchError.textContent = "";
+        batchSaveBtn.disabled = false;
+      }
+      
+      function addBatchSKUs() {
+        const sku = batchSKUInput.value.trim();
+        batchError.style.display = "none";
+        batchError.textContent = "";
+        
+        if (!sku) {
+          batchError.textContent = "Error: SKU cannot be empty.";
+          batchError.style.display = "block";
+          return;
+        }
+        
+        if (!section.validationRegex.test(sku)) {
+          batchError.textContent = "Error: SKU must be a 5-digit number (e.g., 12345).";
+          batchError.style.display = "block";
+          return;
+        }
+        
+        if (batchSKUs.includes(sku)) {
+          batchError.textContent = "Error: SKU already added.";
+          batchError.style.display = "block";
+          return;
+        }
+        
+        batchSKUs.push(sku);
+        batchSKUInput.value = "";
+        updateBatchSKUList();
+        batchError.textContent = "SKU added successfully.";
+        batchError.style.display = "block";
+        setTimeout(() => batchError.style.display = "none", 3000);
+      }
+      
+      function updateBatchSKUList() {
+          batchSKUList.innerHTML = "";
+          batchDownloadBtn.disabled = batchSKUs.length === 0;
+          if (batchSKUs.length === 0) {
+              const emptyItem = document.createElement("div");
+              emptyItem.textContent = "No SKUs added.";
+              emptyItem.style.fontSize = "12pt";
+              emptyItem.style.padding = "24px";
+              batchSKUList.appendChild(emptyItem);
+              return;
+          }
+          batchSKUs.forEach((sku, index) => {
+              const item = document.createElement("div");
+              item.className = "batch-sku-item";
+              const skuText = document.createElement("span");
+              skuText.textContent = sku;
+              const removeBtn = document.createElement("button");
+              removeBtn.textContent = "Remove";
+              removeBtn.dataset.index = index;
+              removeBtn.addEventListener("click", () => {
+                  batchSKUs.splice(index, 1);
+                  updateBatchSKUList();
+              });
+              item.appendChild(skuText);
+              item.appendChild(removeBtn);
+              batchSKUList.appendChild(item);
+          });
+      }
+      
+      async function downloadBatchImagesAsZip() {
+        batchDownloadBtn.disabled = true;
+        batchAddBtn.disabled = true;
+        batchError.style.display = "none";
+        batchError.textContent = "";
+        loading.style.display = "block";
+        closeBatchModal();
+        
+        const zip = new JSZip();
+        let hasImages = false;
+        const missingImages = [];
+        
+        for (const sku of batchSKUs) {
+          for (const size of section.sizes) {
+            const type = ".png";
+            const url = `/api/fetch-image?sku=${sku}&size=${size}&type=${type}`;
+            const fileName = `${sku}_${size}${type}`;
+            
+            try {
+              const response = await fetch(url, { method: "GET" });
+              console.log(`Batch fetching ${url}: Status ${response.status}`);
+              if (response.ok) {
+                const data = await response.json();
+                if (data.isBase64Encoded) {
+                  const binaryString = atob(data.body);
+                  const len = binaryString.length;
+                  const bytes = new Uint8Array(len);
+                  for (let i = 0; i < len; i++) {
+                    bytes[i] = binaryString.charCodeAt(i);
+                  }
+                  zip.file(fileName, bytes);
+                  hasImages = true;
+                } else {
+                  throw new Error('Response is not base64 encoded');
+                }
+              } else {
+                missingImages.push(`${sku}-${size}${type}`);
+                console.log(`Batch failed to fetch ${url}: Status ${response.status}`);
+              }
+            } catch (error) {
+              missingImages.push(`${sku}-${size}${type}`);
+              console.error(`Batch error fetching ${url}: ${error.message}`);
+            }
+          }
+        }
+        
+        loading.style.display = "none";
+        batchDownloadBtn.disabled = false;
+        batchAddBtn.disabled = false;
+        
+        if (!hasImages) {
+          errorMessage.textContent = `Error: No PNG images found for SKUs: ${batchSKUs.join(", ")}. Missing: ${missingImages.join(", ")}`;
+          errorMessage.style.display = "block";
+          return;
+        }
+        
+        try {
+          const content = await zip.generateAsync({ type: "blob" });
+          saveAs(content, `batch_skus_images.zip`);
+          batchSKUs = []; // Clear batch after download
+          errorMessage.textContent = `Success: Batch download complete for SKUs: ${batchSKUs.join(", ")}.`;
+          errorMessage.style.display = "block";
+          setTimeout(() => errorMessage.style.display = "none", 3000);
+          if (missingImages.length > 0) {
+            errorMessage.textContent += ` Warning: Some images missing: ${missingImages.join(", ")}`;
+            errorMessage.style.display = "block";
+          }
+        } catch (error) {
+          console.error(`Error generating ZIP: ${error.message}`);
+          errorMessage.textContent = "Error: Failed to generate batch ZIP file.";
+          errorMessage.style.display = "block";
+        }
+      }
       
       function toggleTheme() {
         isDarkTheme = !isDarkTheme;
@@ -378,6 +634,7 @@
         sizesBtn.setAttribute("aria-label", showAllSizes ? "Hide additional image sizes" : "Show additional image sizes");
         downloadBtn.style.display = showAllSizes ? "inline-block" : "none";
         searchBtn.style.display = showAllSizes ? "inline-block" : "none";
+        batchBtn.style.display = showAllSizes ? "inline-block" : "none";
         displayImages(currentSKU);
       }
       
@@ -397,7 +654,7 @@
         const missingImages = [];
         
         for (const size of section.sizes) {
-          const type = ".png"; // Only download PNG files
+          const type = ".png";
           const url = `/api/fetch-image?sku=${currentSKU}&size=${size}&type=${type}`;
           const fileName = `${currentSKU}_${size}${type}`;
           
@@ -508,9 +765,9 @@
         } catch (error) {
           console.error(`Scan error: ${error.message}`);
           isScanning = false;
-          cancelBtn.style.display = "none";
+          cancelBtn.disabled = "none";
           prevExteriorBtn.disabled = false;
-          nextExteriorBtn.disabled = false;
+          nextBtn.disabled = false;
           testedSKUs = [];
           localStorage.setItem("testedSKUs", JSON.stringify(testedSKUs));
           checkedSKUsDisplay.textContent = "Checked SKUs (no images): None";
@@ -602,15 +859,14 @@
         if (validSKUs.length === 0) {
           errorMessage.style.display = "none";
           errorMessage.textContent = "Error: No valid SKUs with images found yet. Use exterior arrows to find some.";
-          errorMessage.style.display = "block";
-          loading.style.display = "none";
+          errorMessage.style.display = true;"block";
           console.log(`No valid SKUs for interior navigation`);
           return;
         }
         
         errorMessage.style.display = "none";
         errorMessage.textContent = "";
-        loading.style.display = "block";
+        loading.style.display = true;"block";
         tableContainer.innerHTML = "";
         
         const currentValue = skuToNumber(currentSKU);
@@ -663,12 +919,12 @@
           
           while (attempts < maxAttempts && !signal.aborted) {
             const timeoutController = new AbortController();
-            const timeoutId = setTimeout(() => timeoutController.abort(), section.fetchTimeout);
+            const timeoutId = setTimeout(() => timeoutController.signal(timeout), section.fetchTimeout);
             
             try {
               const response = await fetch(url, { 
                 method: 'GET', 
-                signal: AbortSignal.any([signal, timeoutController.signal])
+                signal: AbortController.any([signal, timeoutController.signal])
               });
               console.log(`Checking ${url}: Status ${response.status}, Attempt ${attempts + 1}`);
               if (response.ok) {
@@ -702,9 +958,9 @@
                 continue;
               } else if (error.name === "AbortError") {
                 clearTimeout(timeoutId);
-                throw error; // Manual abort via cancel button
+                throw error; // Manual abort
               }
-              break; // Other errors (e.g., network failure)
+              break; // Other errors
             } finally {
               clearTimeout(timeoutId);
             }
@@ -757,11 +1013,11 @@
                   img.src = `data:${data.contentType};base64,${data.body}`;
                   innerCard.appendChild(img);
                 } else {
-                  throw new Error('Response is not base64 encoded');
-                }
-              } else {
-                throw new Error(`Status ${response.status}`);
+                throw new Error('Response is not base64 encoded');
               }
+            } else {
+              throw new Error(`Status ${response.status}`);
+            }
             } catch (error) {
               failedImages++;
               missingImages.push(heading);
@@ -869,6 +1125,7 @@
         sizesBtn.setAttribute("aria-label", "Show additional image sizes");
         downloadBtn.style.display = "none";
         searchBtn.style.display = "none";
+        batchSaveBtn.style.display = "none";
         if (abortController) {
           abortController.abort();
           abortController = null;
