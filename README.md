@@ -6,4 +6,3 @@ A next-gen version of the tool created by Tate to scrape ifsta shop item images.
 
 Hosted deployment testing: 
 https://ifsta-image.netlify.app/
-https://aaronfpp.github.io/image-scraper/
