@@ -69,6 +69,16 @@
       .inner-card h3 {
         color: #333333;
       }
+      .dark-theme .inner-card h3 {
+        color: #ffffff;
+      }
+      .inner-card h3 a {
+        color: inherit;
+        text-decoration: none;
+      }
+      .inner-card h3 a:hover {
+        text-decoration: underline;
+      }
       #error-message {
         color: red;
         font-size: 14pt;
@@ -993,7 +1003,8 @@
             imgContainer.appendChild(innerCard);
             
             const heading = `${size}${type}`;
-            innerCard.innerHTML += `<h3>${heading}</h3>`;
+            const imageUrl = `${section.baseURL}${sku}/${size}${type}`;
+            innerCard.innerHTML += `<h3><a href="${imageUrl}" target="_blank" rel="noopener noreferrer">${heading}</a></h3>`;
             
             const imgSrc = `/api/fetch-image?sku=${sku}&size=${size}&type=${type}`;
             const img = document.createElement("img");
