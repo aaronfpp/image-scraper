@@ -1122,35 +1122,43 @@ async function displayImages(sku) {
         }
 
         // Fetch product title
-try {
-    const response = await fetch(`/api/fetch-image?sku=${sku}&action=getProductTitle`, { 
-        method: "GET",
-        headers: {
-            'Accept': 'application/json'
-        }
-    });
-    
-    if (!response.ok) {
-        if (response.status === 500) {
-            // Server error - try again after a delay
-            await new Promise(resolve => setTimeout(resolve, 1000));
-            return displayImages(sku); // Retry the entire function
-        }
-        throw new Error(`Failed to fetch product title: Status ${response.status}`);
-    }
+        try {
+            const response = await fetch(`/api/fetch-image?sku=${sku}&action=getProductTitle`, { 
+                method: "GET",
+                headers: {
+                    'Accept': 'application/json'
+                }
+            });
+            
+            if (!response.ok) {
+                if (response.status === 500) {
+                    // Server error - try again after a delay
+                    await new Promise(resolve => setTimeout(resolve, 1000));
+                    return displayImages(sku); // Retry the entire function
+                }
+                throw new Error(`Failed to fetch product title: Status ${response.status}`);
+            }
 
-    const data = await response.json();
-    
-    if (data.title) {
-        productTitle.style.display = "none";
-        productTitle.innerHTML = `<p><strong>Product:</strong> ${data.title}</p>`;
-        productTitle.style.display = "block";
+            const data = await response.json();
+            
+            if (data.title) {
+                productTitle.style.display = "none";
+                productTitle.innerHTML = `<p><strong>Product:</strong> ${data.title}</p>`;
+                productTitle.style.display = "block";
+            }
+        } catch (error) {
+            console.error(`Error fetching title for SKU ${sku}: ${error.message}`);
+            // Continue execution even if title fetch fails
+            updateCompletionStatus();
+            return;
+        }
+
+    } catch (error) {
+        console.error(`Critical error in displayImages: ${error.message}`);
+        loading.style.display = "none";
+        errorMessage.textContent = `An error occurred while processing images: ${error.message}`;
+        errorMessage.style.display = "block";
     }
-} catch (error) {
-    console.error(`Error fetching title for SKU ${sku}: ${error.message}`);
-    // Continue execution even if title fetch fails
-    updateCompletionStatus();
-    return;
 }
       
       function updateCheckedSKUsDisplay() {
