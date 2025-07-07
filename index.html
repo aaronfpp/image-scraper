@@ -5,15 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>ImageScraper by Tate</title>
+    <link rel="icon" type="image/x-icon" href="/favicon.ico">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
-    <link rel="icon" href="/icons/favicon.ico" type="image/x-icon" sizes="16x16 32x32">
-    <link rel="icon" type="image/png" sizes="16x16" href="/icons/favicon-16x16.png">
-    <link rel="icon" type="image/png" sizes="32x32" href="/icons/favicon-32x32.png">
-    <link rel="apple-touch-icon" sizes="180x180" href="/icons/apple-touch-icon.png">
-    <link rel="manifest" href="/icons/site.webmanifest">
     <style>
       html, body {
-        font-family: Arial, sans-serif;
+        font-family: system-ui;
         margin: 0;
         padding: 0;
         text-align: center;
@@ -21,189 +17,190 @@
         color: #000000;
         min-height: 100vh;
       }
+      
       body {
         display: flex;
         flex-direction: column;
         min-height: 100vh;
       }
-      .container {
-        flex: 1 auto;
+      
+      main {
+        flex: 1 0 auto;
       }
+      
       footer {
         flex-shrink: 0;
         font-size: 12pt;
         text-align: center;
         padding: 10px;
-        color: #333333;
+        color: #000000;
       }
+      
       .dark-theme footer {
         color: #ffffff;
       }
+      
       h1 {
         margin-top: 0;
       }
+      
       .dark-theme {
-        background: #333333 var(--background-image, none) no-repeat center center fixed;
+        background: url('https://auth.ifsta.org/images/background_e8.jpg') no-repeat center center fixed;
         background-size: cover;
         color: #ffffff;
       }
-      #container {
-        font-size: 32px;
+      
+      #formID {
+        font-size: 16pt;
         margin: 20px 0;
       }
+      
       .img-container {
         display: flex;
         justify-content: center;
         flex-wrap: wrap;
       }
+      
       .inner-card {
         display: inline-block;
+        text-align: center;
+        background-color: #abebff;
         margin: 10px;
         padding: 10px;
-        background-color: #abebff;
-        text-align: center;
       }
+      
       .dark-theme .inner-card {
         background-color: #cbccce;
       }
+      
       .inner-card h3 {
-        color: #333333;
+        color: #000000;
       }
-      .dark-theme .inner-card h3 {
-        color: #ffffff;
-      }
-      .inner-card h3 a {
-        color: inherit;
-        text-decoration: none;
-      }
-      .inner-card h3 a:hover {
-        text-decoration: underline;
-      }
+      
       #error-message {
         color: red;
         font-size: 14pt;
-        font-weight: bold;
         margin-top: 10px;
         display: none;
       }
+      
       .dark-theme #error-message {
         color: #ff9999;
       }
+      
+      #product-title {
+        font-size: 16pt;
+        margin: 10px 0;
+        display: none;
+      }
+      
+      .dark-theme #product-title {
+        color: #ffffff;
+      }
+      
+      #product-title p {
+        margin: 5px 0;
+      }
+      
       .btn {
         font-size: 14pt;
         margin: 0 5px;
-        padding: 4px 15px;
+        padding: 5px 15px;
         cursor: pointer;
         background-color: #007bff;
         color: white;
         border: none;
         border-radius: 5px;
       }
+      
       .btn:hover {
         background-color: #0056b3;
       }
+      
       .dark-theme .btn {
         background-color: #b32318;
       }
+      
       .dark-theme .btn:hover {
         background-color: #8e1c13;
       }
+      
       .btn:disabled {
         background-color: #cccccc;
         cursor: not-allowed;
         color: #666666;
       }
+      
       .dark-theme .btn:disabled {
         color: #999999;
       }
-      #cancel-btn {
+      
+      #cancel-btn, #batch-download-btn {
         background-color: #dc3545;
       }
-      .dark-theme #cancel-btn {
+      
+      .dark-theme #cancel-btn, .dark-theme #batch-download-btn {
         background-color: #b32318;
       }
-      #cancel-btn:hover {
+      
+      #cancel-btn:hover, #batch-download-btn:hover {
         background-color: #c82333;
       }
-      .dark-theme #cancel-btn:hover {
+      
+      .dark-theme #cancel-btn:hover, .dark-theme #batch-download-btn:hover {
         background-color: #8e1c13;
       }
-      #theme-btn, #download-btn, #search-btn, #batch-save-btn {
+      
+      #theme-btn, #download-btn, #batch-save-btn, #search-btn {
         position: absolute;
         top: 10px;
-        background-color: #333333;
+        background-color: #17a2b8;
         font-size: 12pt;
         padding: 8px;
-        display: block;
+        display: none;
       }
-      #theme-btn { right: 10px; }
-      #download-btn { right: 50px; }
-      #search-btn { right: 90px; }
-      #batch-save-btn { right: 130px; }
-      #theme-btn:hover, #download-btn:hover, #search-btn:hover, #batch-save-btn:hover {
-        background-color: #555555;
+      
+      #theme-btn {
+        right: 10px;
       }
-      .dark-theme #theme-btn, .dark-theme #download-btn, .dark-theme #search-btn, .dark-theme #batch-save-btn {
+      
+      #download-btn {
+        right: 50px;
+      }
+      
+      #batch-save-btn {
+        right: 90px;
+      }
+      
+      #search-btn {
+        right: 130px;
+      }
+      
+      #theme-btn:hover, #download-btn:hover, #batch-save-btn:hover, #search-btn:hover {
+        background-color: #138496;
+      }
+      
+      .dark-theme #theme-btn, .dark-theme #download-btn, .dark-theme #batch-save-btn, .dark-theme #search-btn {
         background-color: #b32318;
       }
-      .dark-theme #theme-btn:hover, .dark-theme #download-btn:hover, .dark-theme #search-btn:hover, .dark-theme #batch-save-btn:hover {
+      
+      .dark-theme #theme-btn:hover, .dark-theme #download-btn:hover, .dark-theme #batch-save-btn:hover, .dark-theme #search-btn:hover {
         background-color: #8e1c13;
       }
-      img {
-        max-width: 100%;
-        height: auto;
-        display: block;
-      }
-      .default-image {
-        max-width: 400px;
-      }
-      .image-error {
-        color: red;
+      
+      #theme-label {
+        position: absolute;
+        top: 12px;
+        right: 50px;
         font-size: 12pt;
-        margin: 10px 0;
+        color: #000000;
       }
-      .dark-theme .image-error {
-        color: #ff9999;
-      }
-      #loading {
-        font-size: 14pt;
-        margin-top: 10px;
-        display: none;
-      }
-      .dark-theme #loading {
+      
+      .dark-theme #theme-label {
         color: #ffffff;
       }
-      #sku-input {
-        font-size: 14pt;
-        margin: 0 5px;
-        padding: 5px;
-        width: 100px;
-        text-align: center;
-      }
-      .dark-theme #sku-input {
-        color: #ffffff;
-        background-color: #333333;
-        border: 1px solid #ffffff;
-      }
-      #checked-skus, #valid-skus-range {
-        font-size: 12pt;
-        margin-top: 10px;
-        max-width: 600px;
-        margin-left: auto;
-        margin-right: auto;
-        word-wrap: break-word;
-      }
-      .dark-theme #checked-skus, .dark-theme #valid-skus-range {
-        color: #ffffff;
-      }
-      .dark-theme h1, .dark-theme h2 {
-        color: #ffffff;
-      }
-      #cancel-btn {
-        display: none;
-      }
-      /* Batch Save Modal Styles */
-      .batch-modal {
+      
+      #batch-modal {
         display: none;
         position: fixed;
         top: 50%;
@@ -211,86 +208,19 @@
         transform: translate(-50%, -50%);
         background-color: #ffffff;
         padding: 20px;
-        border-radius: 10px;
-        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        border-radius: 5px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
         z-index: 1000;
-        width: 300px;
-        text-align: left;
+        max-width: 500px;
+        width: 90%;
       }
-      .dark-theme .batch-modal {
+      
+      .dark-theme #batch-modal {
         background-color: #333333;
         color: #ffffff;
       }
-      .batch-modal h3 {
-        margin-top: 0;
-        color: #000000;
-      }
-      .dark-theme .batch-modal h3 {
-        color: #ffffff;
-      }
-      #batch-sku-input {
-        width: 100%;
-        padding: 5px;
-        margin-bottom: 10px;
-        font-size: 12pt;
-        color: #000000;
-      }
-      .dark-theme #batch-sku-input {
-        color: #ffffff;
-        background-color: #444444;
-        border: 1px solid #ffffff;
-      }
-      #batch-sku-list {
-        max-height: 150px;
-        overflow-y: auto;
-        margin-bottom: 10px;
-      }
-      .batch-sku-item {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        padding: 5px;
-        border-bottom: 1px solid #cccccc;
-      }
-      .dark-theme .batch-sku-item {
-        border-bottom: 1px solid #666666;
-      }
-      .batch-sku-item span {
-        font-size: 12pt;
-      }
-      .batch-sku-item button {
-        background-color: #dc3545;
-        color: white;
-        border: none;
-        padding: 2px 8px;
-        cursor: pointer;
-        border-radius: 3px;
-        font-size: 10pt;
-      }
-      .batch-sku-item button:hover {
-        background-color: #c82333;
-      }
-      .dark-theme .batch-sku-item button {
-        background-color: #b32318;
-      }
-      .dark-theme .batch-sku-item button:hover {
-        background-color: #8e1c13;
-      }
-      .batch-modal .btn {
-        font-size: 12pt;
-        padding: 5px 10px;
-        margin-right: 5px;
-      }
-      #batch-error {
-        color: red;
-        font-size: 10pt;
-        margin-bottom: 10px;
-        display: none;
-      }
-      .dark-theme #batch-error {
-        color: #ff9999;
-      }
-      .modal-overlay {
+      
+      #batch-modal-overlay {
         display: none;
         position: fixed;
         top: 0;
@@ -300,41 +230,126 @@
         background-color: rgba(0, 0, 0, 0.5);
         z-index: 999;
       }
-      #theme-label {
-        position: absolute;
-        top: 40px;
-        right: 10px;
-        font-size: 10pt;
-        color: #333333;
-        background-color: rgba(255, 255, 255, 0.8);
-        padding: 2px 5px;
-        border-radius: 3px;
+      
+      #batch-sku-input {
+        font-size: 14pt;
+        margin: 10px 0;
+        padding: 5px;
+        width: 100%;
+        color: #000000;
       }
-      .dark-theme #theme-label {
+      
+      .dark-theme #batch-sku-input {
+        background-color: #444444;
         color: #ffffff;
-        background-color: rgba(0, 0, 0, 0.8);
+        border: 1px solid #ffffff;
+      }
+      
+      #batch-error {
+        color: red;
+        font-size: 12pt;
+        margin: 10px 0;
+        display: none;
+      }
+      
+      .dark-theme #batch-error {
+        color: #ff9999;
+      }
+      
+      #batch-sku-list {
+        max-height: 200px;
+        overflow-y: auto;
+        margin: 10px 0;
+        padding: 10px;
+        background-color: #f0f0f0;
+        border: 1px solid #cccccc;
+      }
+      
+      .dark-theme #batch-sku-list {
+        background-color: #444444;
+        border: 1px solid #ffffff;
+      }
+      
+      #batch-sku-list div {
+        margin: 5px 0;
+      }
+      
+      img {
+        max-width: 100%;
+        height: auto;
+        display: block;
+      }
+      
+      .default-image {
+        max-width: 400px;
+      }
+      
+      .image-error {
+        color: red;
+        font-size: 12pt;
+        margin: 10px 0;
+      }
+      
+      .dark-theme .image-error {
+        color: #ff9999;
+      }
+      
+      #loading {
+        font-size: 14pt;
+        margin-top: 10px;
+        display: none;
+      }
+      
+      .dark-theme #loading {
+        color: #ffffff;
+      }
+      
+      #sku-input {
+        font-size: 16pt;
+        margin: 0 5px;
+        padding: 5px;
+        width: 100px;
+        text-align: center;
+        color: #000000;
+      }
+      
+      .dark-theme #sku-input {
+        color: #ffffff;
+        background-color: #333333;
+        border: 1px solid #ffffff;
+      }
+      
+      #checked-skus, #valid-skus-range {
+        font-size: 14pt;
+        margin-top: 10px;
+        max-width: 600px;
+        margin-left: auto;
+        margin-right: auto;
+        word-wrap: break-word;
+      }
+      
+      .dark-theme #checked-skus,
+      .dark-theme #valid-skus-range {
+        color: #ffffff;
+      }
+      
+      .dark-theme h1,
+      .dark-theme h2 {
+        color: #ffffff;
+      }
+      
+      #cancel-btn, #batch-download-btn {
+        display: none;
       }
     </style>
   </head>
   <body>
     <main>
-      <!-- Batch Save Button -->
-      <button id="batch-save-btn" class="btn" aria-label="Batch save SKUs"><i class="fas fa-save"></i></button>
       <button id="search-btn" class="btn" aria-label="Search IFSTA for SKU"><i class="fas fa-globe"></i></button>
       <button id="download-btn" class="btn" aria-label="Download PNG images as ZIP"><i class="fas fa-cloud-arrow-down"></i></button>
-      <button id="theme-btn" class="btn" aria-label="Switch to next background"><i class="fas fa-paint-brush"></i></button>
-      <span id="theme-label"></span>
-      <!-- Batch Save Modal -->
-      <div class="modal-overlay" id="batch-modal-overlay"></div>
-      <div class="batch-modal" id="batch-modal">
-        <h3>Batch Save SKUs</h3>
-        <input type="text" id="batch-sku-input" placeholder="Enter 5-digit SKU" aria-label="Enter SKU for batch download">
-        <div id="batch-error" aria-live="polite"></div>
-        <button id="batch-add-btn" class="btn" aria-label="Add SKU to batch">Add SKU</button>
-        <div id="batch-sku-list" aria-label="List of SKUs for batch download"></div>
-        <button id="batch-download-btn" class="btn" aria-label="Download batch SKUs as ZIP" disabled>Batch Download</button>
-        <button id="batch-cancel-btn" class="btn" aria-label="Cancel batch save">Cancel</button>
-      </div>
+      <button id="batch-save-btn" class="btn" aria-label="Open batch SKU modal"><i class="fas fa-save"></i></button>
+      <button id="theme-btn" class="btn" aria-label="Switch to dark theme"><i class="fas fa-paint-brush"></i></button>
+      <span id="theme-label">Theme</span>
       <h1>Welcome to ImageScraper!</h1>
       <h2>By Tate</h2>
       <div id="formID">
@@ -347,14 +362,27 @@
         <button id="submit-btn" class="btn" aria-label="Submit SKU">Go</button>
         <button id="clear-btn" class="btn" aria-label="Clear input and images">Clear</button>
         <button id="cancel-btn" class="btn" aria-label="Cancel ongoing scan">Cancel</button>
+        <button id="batch-download-btn" class="btn" aria-label="Batch Download SKUs">Batch Download</button>
       </div>
       <div id="error-message" aria-live="polite"></div>
-      <div id="loading">Loading...</div>
+      <div id="product-title"></div>
       <div id="tableID"></div>
+      <div id="loading">Loading...</div>
+      <div id="batch-modal-overlay"></div>
+      <div id="batch-modal">
+        <h3>Batch SKUs</h3>
+        <input type="text" id="batch-sku-input" placeholder="Enter SKUs (comma-separated)">
+        <div id="batch-error"></div>
+        <div id="batch-sku-list"></div>
+        <button id="batch-add-btn" class="btn">Add SKUs</button>
+        <button id="batch-cancel-btn" class="btn">Cancel</button>
+      </div>
       <div id="checked-skus">Checked SKUs (no images): None</div>
       <div id="valid-skus-range">Known SKUs with images: None</div>
     </main>
-    <footer id="footer" aria-label="IFSTA Copyright 2025">IFSTA © 2025 https://github.com/aaronfpp/image-scraper</footer>
+    <footer id="footer" aria-label="IFSTA Copyright 2025">
+      IFSTA © 2025 <a href="https://github.com/aaronfpp/image-scraper">GitHub</a>
+    </footer>
     
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
@@ -365,15 +393,8 @@
         fileTypes: [".png", ".webp"],
         inputLabel: "SKU",
         validationRegex: /^[0-9]{5}$/,
-        fetchTimeout: 10000
+        fetchTimeout: 5000
       };
-      
-      const backgrounds = [
-        { name: "Default", url: "" },
-        { name: "Alternative 1", url: "/images/background_alt1.jpg" },
-        { name: "Alternative 2", url: "/images/background_alt2.jpg" },
-        { name: "Alternative 3", url: "/images/background_e8.jpg" }
-      ];
       
       const themeBtn = document.getElementById("theme-btn");
       const downloadBtn = document.getElementById("download-btn");
@@ -383,7 +404,6 @@
       const batchModalOverlay = document.getElementById("batch-modal-overlay");
       const batchSKUInput = document.getElementById("batch-sku-input");
       const batchAddBtn = document.getElementById("batch-add-btn");
-      const batchDownloadBtn = document.getElementById("batch-download-btn");
       const batchCancelBtn = document.getElementById("batch-cancel-btn");
       const batchSKUList = document.getElementById("batch-sku-list");
       const batchError = document.getElementById("batch-error");
@@ -397,14 +417,15 @@
       const clearBtn = document.getElementById("clear-btn");
       const cancelBtn = document.getElementById("cancel-btn");
       const errorMessage = document.getElementById("error-message");
+      const productTitle = document.getElementById("product-title");
       const loading = document.getElementById("loading");
       const tableContainer = document.getElementById("tableID");
       const checkedSKUsDisplay = document.getElementById("checked-skus");
       const validSKUsRangeDisplay = document.getElementById("valid-skus-range");
       const themeLabel = document.getElementById("theme-label");
       
-      let testedSKUs = JSON.parse(localStorage.getItem("testedSKUs")) || [];
-      let validSKUs = JSON.parse(localStorage.getItem("validSKUs")) || [];
+      let testedSKUs = [];
+      let validSKUs = [];
       let batchSKUs = [];
       let currentSKU = localStorage.getItem("currentSKU") && section.validationRegex.test(localStorage.getItem("currentSKU")) ? localStorage.getItem("currentSKU") : "00000";
       let isScanning = false;
@@ -413,22 +434,17 @@
       let scanCount = 0;
       const maxScanAttempts = 100;
       let showAllSizes = false;
-      let currentBackgroundIndex = parseInt(localStorage.getItem("currentBackgroundIndex")) || 0;
+      let isDarkTheme = false;
       
       skuInput.value = currentSKU;
-      updateCheckedSKUsDisplay();
-      updateValidSKUsRange();
-      updateInteriorButtonState();
-      updateTheme();
       
       themeBtn.addEventListener("click", toggleTheme);
       downloadBtn.addEventListener("click", downloadImagesAsZip);
-      searchBtn.addEventListener("click", searchIFSTA);
-      batchSaveBtn.addEventListener("click", toggleBatchModal);
-      batchAddBtn.addEventListener("click", addBatchSKU);
-      batchDownloadBtn.addEventListener("click", downloadBatchImagesAsZip);
+      batchSaveBtn.addEventListener("click", openBatchModal);
+      batchAddBtn.addEventListener("click", addBatchSKUs);
       batchCancelBtn.addEventListener("click", closeBatchModal);
       batchModalOverlay.addEventListener("click", closeBatchModal);
+      searchBtn.addEventListener("click", searchIFSTA);
       sizesBtn.addEventListener("click", toggleSizes);
       prevExteriorBtn.addEventListener("click", () => navigateSKU(-1));
       nextExteriorBtn.addEventListener("click", () => navigateSKU(1));
@@ -440,214 +456,158 @@
       });
       clearBtn.addEventListener("click", clearForm);
       cancelBtn.addEventListener("click", cancelScan);
+      batchDownloadBtn.addEventListener("click", batchDownloadSKUs);
       
       displayImages(currentSKU);
       
       function toggleTheme() {
-        currentBackgroundIndex = (currentBackgroundIndex + 1) % backgrounds.length;
-        localStorage.setItem("currentBackgroundIndex", currentBackgroundIndex);
-        updateTheme();
+        isDarkTheme = !isDarkTheme;
+        document.body.classList.toggle("dark-theme");
+        themeBtn.setAttribute("aria-label", isDarkTheme ? "Switch to light theme" : "Switch to dark theme");
+        themeLabel.textContent = isDarkTheme ? "Light" : "Dark";
       }
       
-      function updateTheme() {
-        const isDarkTheme = currentBackgroundIndex !== 0;
-        document.body.classList.toggle("dark-theme", isDarkTheme);
-        const bgUrl = backgrounds[currentBackgroundIndex].url ? `url('${backgrounds[currentBackgroundIndex].url}')` : 'none';
-        document.documentElement.style.setProperty('--background-image', bgUrl);
-        themeBtn.setAttribute("aria-label", `Switch to ${backgrounds[(currentBackgroundIndex + 1) % backgrounds.length].name} background`);
-        themeLabel.textContent = `Theme: ${backgrounds[currentBackgroundIndex].name}`;
-      }
-      
-      function toggleBatchModal() {
+      function openBatchModal() {
         batchModal.style.display = "block";
         batchModalOverlay.style.display = "block";
-        batchSKUInput.focus();
+        batchSKUInput.value = batchSKUs.join(", ");
         updateBatchSKUList();
-        batchSaveBtn.disabled = true;
       }
       
       function closeBatchModal() {
         batchModal.style.display = "none";
         batchModalOverlay.style.display = "none";
-        batchSKUInput.value = "";
         batchError.style.display = "none";
-        batchError.textContent = "";
-        batchSKUs = [];
-        updateBatchSKUList();
-        batchSaveBtn.disabled = false;
-      }
-      
-      function addBatchSKU() {
-        const sku = batchSKUInput.value.trim();
-        batchError.style.display = "none";
-        batchError.textContent = "";
-        
-        if (!sku) {
-          batchError.textContent = "Error: SKU cannot be empty.";
-          batchError.style.display = "block";
-          return;
-        }
-        
-        if (!section.validationRegex.test(sku)) {
-          batchError.textContent = "Error: SKU must be a 5-digit number (e.g., 12345).";
-          batchError.style.display = "block";
-          return;
-        }
-        
-        if (batchSKUs.includes(sku)) {
-          batchError.textContent = "Error: SKU already added.";
-          batchError.style.display = "block";
-          return;
-        }
-        
-        batchSKUs.push(sku);
         batchSKUInput.value = "";
-        updateBatchSKUList();
-        batchError.textContent = "SKU added successfully.";
-        batchError.style.display = "block";
-        setTimeout(() => batchError.style.display = "none", 3000);
       }
       
       function updateBatchSKUList() {
-        batchSKUList.innerHTML = "";
-        batchDownloadBtn.disabled = batchSKUs.length === 0;
-        if (batchSKUs.length === 0) {
-          const emptyItem = document.createElement("div");
-          emptyItem.textContent = "No SKUs added.";
-          emptyItem.style.fontSize = "12pt";
-          emptyItem.style.padding = "5px";
-          batchSKUList.appendChild(emptyItem);
-          return;
-        }
-        batchSKUs.forEach((sku, index) => {
-          const item = document.createElement("div");
-          item.className = "batch-sku-item";
-          const skuText = document.createElement("span");
-          skuText.textContent = sku;
-          const removeBtn = document.createElement("button");
-          removeBtn.textContent = "Remove";
-          removeBtn.addEventListener("click", () => {
-            batchSKUs.splice(index, 1);
-            updateBatchSKUList();
-          });
-          item.appendChild(skuText);
-          item.appendChild(removeBtn);
-          batchSKUList.appendChild(item);
-        });
+        batchSKUList.innerHTML = batchSKUs.length > 0
+          ? batchSKUs.map(sku => `<div>${sku}</div>`).join("")
+          : "<div>No SKUs added</div>";
       }
       
-      async function downloadBatchImagesAsZip() {
-        console.log(`Starting batch download for SKUs: ${batchSKUs.join(", ")}`);
-        if (batchSKUs.length === 0) {
-          console.warn("No SKUs in batch list");
-          batchError.textContent = "Error: No SKUs added for batch download.";
+      async function addBatchSKUs() {
+        const input = batchSKUInput.value.trim();
+        batchError.style.display = "none";
+        batchError.textContent = "";
+        
+        if (!input) {
+          batchError.textContent = "Error: Please enter at least one SKU.";
           batchError.style.display = "block";
           return;
         }
         
-        batchDownloadBtn.disabled = true;
-        batchAddBtn.disabled = true;
-        errorMessage.style.display = "none";
-        errorMessage.textContent = "";
-        batchError.style.display = "none";
-        loading.style.display = "block";
-        
-        const zip = new JSZip();
-        let hasImages = false;
-        const missingImages = [];
-        const missingSKUs = [];
-        const downloadedSKUs = [...batchSKUs];
-        
-        for (const sku of batchSKUs) {
-          console.log(`Fetching images for SKU: ${sku}`);
-          let skuHasImages = false;
-          for (const size of section.sizes) {
-            const type = ".png";
-            const url = `/api/fetch-image?sku=${sku}&size=${size}&type=${type}`;
-            const fileName = `${sku}_${size}${type}`;
-            
-            try {
-              console.log(`Fetching URL: ${url}`);
-              const response = await fetch(url, { method: "GET" });
-              console.log(`[${sku}] ${size}${type}: Status ${response.status}`);
-              
-              if (response.ok) {
-                const data = await response.json();
-                if (data.isBase64Encoded) {
-                  console.log(`[${sku}] ${size}${type}: Valid base64 image found`);
-                  const binaryString = atob(data.body);
-                  const len = binaryString.length;
-                  const bytes = new Uint8Array(len);
-                  for (let i = 0; i < len; i++) {
-                    bytes[i] = binaryString.charCodeAt(i);
-                  }
-                  zip.file(fileName, bytes);
-                  hasImages = true;
-                  skuHasImages = true;
-                } else {
-                  console.warn(`[${sku}] ${size}${type}: Response not base64 encoded`);
-                  missingImages.push(`${sku}_${size}${type}`);
-                }
-              } else {
-                console.warn(`[${sku}] ${size}${type}: Failed with status ${response.status}`);
-                missingImages.push(`${sku}_${size}${type}`);
-              }
-            } catch (error) {
-              console.error(`[${sku}] ${size}${type}: Error fetching: ${error.message}`);
-              missingImages.push(`${sku}_${size}${type}`);
-            }
-            await new Promise(resolve => setTimeout(resolve, 100)); // Rate limiting
-          }
-          if (!skuHasImages) {
-            missingSKUs.push(sku);
-          }
-        }
-        
-        console.log(`Batch fetch complete. Has images: ${hasImages}, Missing images: ${missingImages.join(", ")}`);
-        loading.style.display = "none";
-        batchDownloadBtn.disabled = false;
-        batchAddBtn.disabled = false;
-        
-        if (!hasImages) {
-          console.error(`No images found for SKUs: ${downloadedSKUs.join(", ")}`);
-          errorMessage.textContent = `Error: No PNG images found for SKUs: ${downloadedSKUs.join(", ")}. Missing: ${missingImages.join(", ")}`;
-          errorMessage.style.display = "block";
-          closeBatchModal();
+        const skus = input.split(",").map(s => s.trim()).filter(s => s);
+        const invalidSKUs = skus.filter(sku => !section.validationRegex.test(sku));
+        if (invalidSKUs.length > 0) {
+          batchError.textContent = `Error: Invalid SKUs: ${invalidSKUs.join(", ")}. SKUs must be 5-digit numbers.`;
+          batchError.style.display = "block";
           return;
         }
         
-        try {
-          console.log("Generating ZIP file");
-          closeBatchModal(); // Clear after fetching
-          const content = await zip.generateAsync({ type: "blob" });
-          saveAs(content, `batch_skus_${Date.now()}.zip`);
-          console.log(`ZIP generated successfully for SKUs: ${downloadedSKUs.join(", ")}`);
-          errorMessage.textContent = `Success: Batch download complete for SKUs: ${downloadedSKUs.join(", ")}.`;
-          errorMessage.style.display = "block";
-          setTimeout(() => errorMessage.style.display = "none", 3000);
-          if (missingImages.length > 0) {
-            errorMessage.textContent += ` Warning: Some images missing: ${missingImages.join(", ")}`;
-            errorMessage.style.display = "block";
-          }
-        } catch (error) {
-          console.error(`Error generating ZIP: ${error.message}`);
-          errorMessage.textContent = `Error: Failed to generate batch ZIP file: ${error.message}`;
-          errorMessage.style.display = "block";
-          closeBatchModal();
+        const uniqueNewSKUs = skus.filter(sku => !batchSKUs.includes(sku));
+        if (uniqueNewSKUs.length === 0) {
+          batchError.textContent = "Error: All entered SKUs are already in the batch.";
+          batchError.style.display = "block";
+          return;
         }
-      }
-      
-      function toggleSizes() {
-        showAllSizes = !showAllSizes;
-        sizesBtn.textContent = showAllSizes ? "Hide Sizes" : "Sizes";
-        sizesBtn.setAttribute("aria-expanded", showAllSizes);
-        sizesBtn.setAttribute("aria-label", showAllSizes ? "Hide additional image sizes" : "Show additional image sizes");
-        displayImages(currentSKU);
+        
+        batchSKUs.push(...uniqueNewSKUs);
+        updateBatchSKUList();
+        batchSKUInput.value = "";
+        batchDownloadBtn.style.display = batchSKUs.length > 0 ? "inline-block" : "none";
+        batchError.textContent = `Added ${uniqueNewSKUs.length} SKU(s) to batch.`;
+        batchError.style.display = "block";
       }
       
       function searchIFSTA() {
         const searchUrl = `https://www.ifsta.org/shop/product/${currentSKU}`;
         window.open(searchUrl, '_blank');
+      }
+      
+      async function batchDownloadSKUs() {
+        if (batchSKUs.length === 0) {
+          errorMessage.textContent = "Error: No SKUs in batch to download.";
+          errorMessage.style.display = "block";
+          return;
+        }
+        
+        batchDownloadBtn.disabled = true;
+        errorMessage.style.display = "none";
+        errorMessage.textContent = "";
+        loading.style.display = "block";
+        
+        const zip = new JSZip();
+        let hasImages = false;
+        const missingSKUs = [];
+        
+        for (const sku of batchSKUs) {
+          const folder = zip.folder(sku);
+          const missingImages = [];
+          
+          for (const size of section.sizes) {
+            for (const type of section.fileTypes) {
+              const url = `/api/fetch-image?sku=${sku}&size=${size}&type=${type}`;
+              const fileName = `${size}${type}`;
+              
+              try {
+                const response = await fetch(url, { method: "GET" });
+                console.log(`Fetching ${url}: Status ${response.status}`);
+                if (response.ok) {
+                  const data = await response.json();
+                  if (data.isBase64Encoded) {
+                    const binaryString = atob(data.body);
+                    const len = binaryString.length;
+                    const bytes = new Uint8Array(len);
+                    for (let i = 0; i < len; i++) {
+                      bytes[i] = binaryString.charCodeAt(i);
+                    }
+                    const blob = new Blob([bytes], { type: data.contentType });
+                    folder.file(fileName, blob);
+                    hasImages = true;
+                  } else {
+                    throw new Error('Response is not base64 encoded');
+                  }
+                } else {
+                  missingImages.push(`${size}${type}`);
+                  console.log(`Failed to fetch ${url}: Status ${response.status}`);
+                }
+              } catch (error) {
+                missingImages.push(`${size}${type}`);
+                console.error(`Error fetching ${url}: ${error.message}`);
+              }
+            }
+          }
+          
+          if (missingImages.length === section.sizes.length * section.fileTypes.length) {
+            missingSKUs.push(sku);
+          }
+        }
+        
+        if (!hasImages) {
+          loading.style.display = "none";
+          errorMessage.textContent = `Error: No images found for batch SKUs: ${missingSKUs.join(", ")}`;
+          errorMessage.style.display = "block";
+          batchDownloadBtn.disabled = false;
+          return;
+        }
+        
+        try {
+          const content = await zip.generateAsync({ type: "blob" });
+          saveAs(content, `batch_images_${new Date().toISOString().split('T')[0]}.zip`);
+          if (missingSKUs.length > 0) {
+            errorMessage.textContent = `Warning: No images found for SKUs: ${missingSKUs.join(", ")}`;
+            errorMessage.style.display = "block";
+          }
+        } catch (error) {
+          console.error(`Error generating ZIP: ${error.message}`);
+          errorMessage.textContent = "Error: Failed to generate batch ZIP file.";
+          errorMessage.style.display = "block";
+        }
+        
+        loading.style.display = "none";
+        batchDownloadBtn.disabled = false;
       }
       
       async function downloadImagesAsZip() {
@@ -661,41 +621,42 @@
         const missingImages = [];
         
         for (const size of section.sizes) {
-          const type = ".png";
-          const url = `/api/fetch-image?sku=${currentSKU}&size=${size}&type=${type}`;
-          const fileName = `${currentSKU}_${size}${type}`;
-          
-          try {
-            const response = await fetch(url, { method: "GET" });
-            console.log(`Fetching ${url}: Status ${response.status}`);
-            if (response.ok) {
-              const data = await response.json();
-              if (data.isBase64Encoded) {
-                const binaryString = atob(data.body);
-                const len = binaryString.length;
-                const bytes = new Uint8Array(len);
-                for (let i = 0; i < len; i++) {
-                  bytes[i] = binaryString.charCodeAt(i);
+          for (const type of section.fileTypes) {
+            const url = `/api/fetch-image?sku=${currentSKU}&size=${size}&type=${type}`;
+            const fileName = `${currentSKU}_${size}${type}`;
+            
+            try {
+              const response = await fetch(url, { method: "GET" });
+              console.log(`Fetching ${url}: Status ${response.status}`);
+              if (response.ok) {
+                const data = await response.json();
+                if (data.isBase64Encoded) {
+                  const binaryString = atob(data.body);
+                  const len = binaryString.length;
+                  const bytes = new Uint8Array(len);
+                  for (let i = 0; i < len; i++) {
+                    bytes[i] = binaryString.charCodeAt(i);
+                  }
+                  const blob = new Blob([bytes], { type: data.contentType });
+                  zip.file(fileName, blob);
+                  hasImages = true;
+                } else {
+                  throw new Error('Response is not base64 encoded');
                 }
-                const blob = new Blob([bytes], { type: data.contentType });
-                zip.file(fileName, blob);
-                hasImages = true;
               } else {
-                throw new Error('Response is not base64 encoded');
+                missingImages.push(`${size}${type}`);
+                console.log(`Failed to fetch ${url}: Status ${response.status}`);
               }
-            } else {
+            } catch (error) {
               missingImages.push(`${size}${type}`);
-              console.log(`Failed to fetch ${url}: Status ${response.status}`);
+              console.error(`Error fetching ${url}: ${error.message}`);
             }
-          } catch (error) {
-            missingImages.push(`${size}${type}`);
-            console.error(`Error fetching ${url}: ${error.message}`);
           }
         }
         
         if (!hasImages) {
           loading.style.display = "none";
-          errorMessage.textContent = `Error: No PNG images found for SKU ${currentSKU}. Missing: ${missingImages.join(", ")}`;
+          errorMessage.textContent = `Error: No images found for SKU ${currentSKU}. Missing: ${missingImages.join(", ")}`;
           errorMessage.style.display = "block";
           downloadBtn.disabled = false;
           return;
@@ -705,7 +666,7 @@
           const content = await zip.generateAsync({ type: "blob" });
           saveAs(content, `images_${currentSKU}.zip`);
           if (missingImages.length > 0) {
-            errorMessage.textContent = `Warning: Some PNG images missing for SKU ${currentSKU}: ${missingImages.join(", ")}`;
+            errorMessage.textContent = `Warning: Some images missing for SKU ${currentSKU}: ${missingImages.join(", ")}`;
             errorMessage.style.display = "block";
           }
         } catch (error) {
@@ -725,7 +686,6 @@
         loading.style.display = "block";
         tableContainer.innerHTML = "";
         testedSKUs = [];
-        localStorage.setItem("testedSKUs", JSON.stringify(testedSKUs));
         checkedSKUsDisplay.textContent = "Checked SKUs (no images): None";
         
         if (!input) {
@@ -754,6 +714,7 @@
         lastSKU = currentSKU;
         abortController = new AbortController();
         cancelBtn.style.display = "inline-block";
+        batchDownloadBtn.style.display = "none";
         scanCount = 0;
         
         prevExteriorBtn.disabled = true;
@@ -766,29 +727,22 @@
         
         console.log(`Starting scan from SKU ${currentSKU}, direction ${direction}, testedSKUs: ${testedSKUs.join(", ")}`);
         
-        try {
-          await navigateSKUInternal(direction);
-        } catch (error) {
-          console.error(`Scan error: ${error.message}`);
-          isScanning = false;
-          cancelBtn.style.display = "none";
-          prevExteriorBtn.disabled = false;
-          nextExteriorBtn.disabled = false;
-          testedSKUs = [];
-          localStorage.setItem("testedSKUs", JSON.stringify(testedSKUs));
-          checkedSKUsDisplay.textContent = "Checked SKUs (no images): None";
-          loading.style.display = "none";
-          errorMessage.textContent = `Error during scan: ${error.message}`;
-          errorMessage.style.display = "block";
-        }
+        await navigateSKUInternal(direction);
+        
+        isScanning = false;
+        cancelBtn.style.display = "none";
+        batchDownloadBtn.style.display = batchSKUs.length > 0 ? "inline-block" : "none";
+        prevExteriorBtn.disabled = false;
+        nextExteriorBtn.disabled = false;
+        testedSKUs = [];
+        checkedSKUsDisplay.textContent = "Checked SKUs (no images): None";
       }
       
       async function navigateSKUInternal(direction) {
         if (scanCount >= maxScanAttempts) {
           isScanning = false;
           cancelBtn.style.display = "none";
-          prevExteriorBtn.disabled = false;
-          nextExteriorBtn.disabled = false;
+          batchDownloadBtn.style.display = batchSKUs.length > 0 ? "inline-block" : "none";
           loading.style.display = "none";
           errorMessage.textContent = "Error: No valid SKUs found after checking multiple options. Try a different range or manual entry.";
           errorMessage.style.display = "block";
@@ -805,8 +759,7 @@
         if (nextSKU === null || abortController.signal.aborted) {
           isScanning = false;
           cancelBtn.style.display = "none";
-          prevExteriorBtn.disabled = false;
-          nextExteriorBtn.disabled = false;
+          batchDownloadBtn.style.display = batchSKUs.length > 0 ? "inline-block" : "none";
           loading.style.display = "none";
           if (nextSKU === null) {
             errorMessage.textContent = `Error: Reached ${direction > 0 ? "maximum" : "minimum"} SKU.`;
@@ -824,8 +777,7 @@
         if (abortController.signal.aborted) {
           isScanning = false;
           cancelBtn.style.display = "none";
-          prevExteriorBtn.disabled = false;
-          nextExteriorBtn.disabled = false;
+          batchDownloadBtn.style.display = batchSKUs.length > 0 ? "inline-block" : "none";
           loading.style.display = "none";
           console.log(`Scan aborted for SKU ${nextSKU}`);
           return;
@@ -837,24 +789,14 @@
           localStorage.setItem("currentSKU", currentSKU);
           if (!validSKUs.includes(nextSKU)) {
             validSKUs.push(nextSKU);
-            localStorage.setItem("validSKUs", JSON.stringify(validSKUs));
             updateInteriorButtonState();
             updateValidSKUsRange();
           }
           console.log(`Found valid SKU ${nextSKU}, displaying images`);
           displayImages(currentSKU);
-          isScanning = false;
-          cancelBtn.style.display = "none";
-          prevExteriorBtn.disabled = false;
-          nextExteriorBtn.disabled = false;
-          loading.style.display = "none";
-          testedSKUs = [];
-          localStorage.setItem("testedSKUs", JSON.stringify(testedSKUs));
-          checkedSKUsDisplay.textContent = "Checked SKUs (no images): None";
         } else {
           console.log(`No images for SKU ${nextSKU}, adding to testedSKUs`);
           testedSKUs.push(nextSKU);
-          localStorage.setItem("testedSKUs", JSON.stringify(testedSKUs));
           updateCheckedSKUsDisplay();
           await navigateSKUInternal(direction);
         }
@@ -916,17 +858,17 @@
       }
       
       async function checkImages(sku, signal) {
-        const urls = [`/api/fetch-image?sku=${sku}&size=100&type=.png`];
+        const urls = section.fileTypes.map(type => `/api/fetch-image?sku=${sku}&size=100&type=${type}`);
         let hasImages = false;
+        
+        const timeoutController = new AbortController();
+        const timeoutId = setTimeout(() => timeoutController.abort(), section.fetchTimeout);
         
         for (const url of urls) {
           let attempts = 0;
-          const maxAttempts = 3;
+          const maxAttempts = 2;
           
-          while (attempts < maxAttempts && !signal.aborted) {
-            const timeoutController = new AbortController();
-            const timeoutId = setTimeout(() => timeoutController.abort(), section.fetchTimeout);
-            
+          while (attempts < maxAttempts) {
             try {
               const response = await fetch(url, { 
                 method: 'GET', 
@@ -940,42 +882,35 @@
                     hasImages = true;
                   } else {
                     console.log(`Invalid response for ${url}: Not base64 encoded`);
-                    hasImages = false;
+                    hasImages = true;
                   }
                 } catch (error) {
                   console.error(`Error parsing JSON for ${url}: ${error.message}`);
-                  hasImages = false;
+                  hasImages = true;
                 }
               } else if ([429, 503].includes(response.status)) {
                 console.log(`Retrying ${url}: Status ${response.status}`);
                 attempts++;
-                await new Promise(resolve => setTimeout(resolve, 1000));
-                continue;
+                await new Promise(resolve => setTimeout(resolve, 500));
               } else {
                 console.log(`Failed to fetch ${url}: Status ${response.status}`);
                 break;
               }
             } catch (error) {
               console.error(`Error checking ${url}: ${error.message}, Attempt ${attempts + 1}`);
-              if (error.name === "AbortError" && !signal.aborted) {
-                console.log(`Timeout for ${url}, retrying...`);
-                attempts++;
-                await new Promise(resolve => setTimeout(resolve, 1000));
-                continue;
-              } else if (error.name === "AbortError") {
+              if (error.name === "AbortError") {
                 clearTimeout(timeoutId);
                 throw error;
               }
-              break;
-            } finally {
-              clearTimeout(timeoutId);
+              attempts++;
+              await new Promise(resolve => setTimeout(resolve, 500));
             }
-            if (hasImages) break;
           }
           if (hasImages) break;
           await new Promise(resolve => setTimeout(resolve, 500));
         }
         
+        clearTimeout(timeoutId);
         console.log(`checkImages for SKU ${sku}: ${hasImages ? "Valid" : "Invalid"}`);
         if (!hasImages) {
           errorMessage.textContent = `Error: No images found for SKU ${sku}. The SKU may not exist or the server is unavailable.`;
@@ -985,12 +920,38 @@
       }
       
       async function displayImages(sku) {
+        productTitle.style.display = "none";
+        productTitle.innerHTML = "";
         tableContainer.innerHTML = "";
         let loadedImages = 0;
         let failedImages = 0;
         const displaySizes = showAllSizes ? section.sizes : [section.sizes[0]];
         const totalImages = displaySizes.length * section.fileTypes.length;
         const missingImages = [];
+        
+        // Fetch product title and additional data
+        try {
+          const response = await fetch(`/api/fetch-image?sku=${sku}&action=getProductTitle`, { method: "GET" });
+          console.log(`Fetching title for SKU ${sku}: Status ${response.status}`);
+          if (response.ok) {
+            const data = await response.json();
+            if (data.title) {
+              productTitle.innerHTML = `
+                <p><strong>Product:</strong> ${data.title}</p>
+                ${data.price ? `<p><strong>Price:</strong> ${data.price}</p>` : ''}
+                ${data.description ? `<p><strong>Description:</strong> ${data.description}</p>` : ''}
+                ${data.categories ? `<p><strong>Categories:</strong> ${data.categories}</p>` : ''}
+              `;
+              productTitle.style.display = "block";
+            } else {
+              console.log(`No title returned for SKU ${sku}`);
+            }
+          } else {
+            console.log(`Failed to fetch title for SKU ${sku}: Status ${response.status}`);
+          }
+        } catch (error) {
+          console.error(`Error fetching title for SKU ${sku}: ${error.message}`);
+        }
         
         const imgContainer = document.createElement("div");
         imgContainer.classList.add("img-container");
@@ -1003,37 +964,47 @@
             imgContainer.appendChild(innerCard);
             
             const heading = `${size}${type}`;
-            const imageUrl = `${section.baseURL}${sku}/${size}${type}`;
-            innerCard.innerHTML += `<h3><a href="${imageUrl}" target="_blank" rel="noopener noreferrer">${heading}</a></h3>`;
+            innerCard.innerHTML += `<h3>${heading}</h3>`;
             
             const imgSrc = `/api/fetch-image?sku=${sku}&size=${size}&type=${type}`;
             const img = document.createElement("img");
+            img.src = imgSrc;
             img.alt = `${heading} for SKU ${sku}`;
             img.classList.add("default-image");
             
-            try {
-              const response = await fetch(imgSrc, { method: 'GET' });
-              console.log(`Fetching ${imgSrc}: Status ${response.status}`);
-              if (response.ok) {
-                const data = await response.json();
-                if (data.isBase64Encoded) {
-                  img.src = `data:${data.contentType};base64,${data.body}`;
-                  innerCard.appendChild(img);
-                } else {
-                  throw new Error('Response is not base64 encoded');
-                }
-              } else {
-                throw new Error(`Status ${response.status}`);
-              }
-            } catch (error) {
+            img.onerror = async () => {
               failedImages++;
               missingImages.push(heading);
+              innerCard.removeChild(img);
               const errorText = document.createElement("div");
               errorText.classList.add("image-error");
               errorText.textContent = `Image not found for ${heading}`;
               innerCard.appendChild(errorText);
-              console.log(`Failed to load ${imgSrc}: ${error.message}`);
-            }
+              
+              console.log(`Failed to load ${imgSrc}`);
+              if (loadedImages + failedImages === totalImages) {
+                loading.style.display = "none";
+                if (loadedImages === 0) {
+                  try {
+                    const response = await fetch(imgSrc);
+                    const data = response.ok ? await response.json() : { error: `Status ${response.status}` };
+                    errorMessage.textContent = `Error: No images found for SKU ${sku}. ${data.error || 'The SKU may not exist or the server is unavailable.'}`;
+                    errorMessage.style.display = "block";
+                  } catch (error) {
+                    errorMessage.textContent = `Error: No images found for SKU ${sku}. Failed to connect to server: ${error.message}`;
+                    errorMessage.style.display = "block";
+                  }
+                } else if (loadedImages > 0 && !validSKUs.includes(sku)) {
+                  validSKUs.push(sku);
+                  updateInteriorButtonState();
+                  updateValidSKUsRange();
+                }
+                if (missingImages.length > 0) {
+                  errorMessage.textContent = `Warning: Some images missing for SKU ${sku}: ${missingImages.join(", ")}`;
+                  errorMessage.style.display = "block";
+                }
+              }
+            };
             
             img.onload = () => {
               loadedImages++;
@@ -1042,50 +1013,17 @@
                 loading.style.display = "none";
                 if (loadedImages > 0 && !validSKUs.includes(sku)) {
                   validSKUs.push(sku);
-                  localStorage.setItem("validSKUs", JSON.stringify(validSKUs));
                   updateInteriorButtonState();
                   updateValidSKUsRange();
                 }
-                if (loadedImages === 0) {
-                  errorMessage.textContent = `Error: No images found for SKU ${sku}. The SKU may not exist or the server is unavailable.`;
-                  errorMessage.style.display = "block";
-                } else if (missingImages.length > 0) {
+                if (missingImages.length > 0) {
                   errorMessage.textContent = `Warning: Some images missing for SKU ${sku}: ${missingImages.join(", ")}`;
                   errorMessage.style.display = "block";
                 }
               }
             };
             
-            img.onerror = () => {
-              failedImages++;
-              missingImages.push(heading);
-              innerCard.removeChild(img);
-              const errorText = document.createElement("div");
-              errorText.classList.add("image-error");
-              errorText.textContent = `Image not found for ${heading}`;
-              innerCard.appendChild(errorText);
-              console.log(`Failed to load ${imgSrc}`);
-              if (loadedImages + failedImages === totalImages) {
-                loading.style.display = "none";
-                if (loadedImages > 0 && !validSKUs.includes(sku)) {
-                  validSKUs.push(sku);
-                  localStorage.setItem("validSKUs", JSON.stringify(validSKUs));
-                  updateInteriorButtonState();
-                  updateValidSKUsRange();
-                }
-                if (loadedImages === 0) {
-                  errorMessage.textContent = `Error: No images found for SKU ${sku}. The SKU may not exist or the server is unavailable.`;
-                  errorMessage.style.display = "block";
-                } else if (missingImages.length > 0) {
-                  errorMessage.textContent = `Warning: Some images missing for SKU ${sku}: ${missingImages.join(", ")}`;
-                  errorMessage.style.display = "block";
-                }
-              }
-            };
-            
-            if (img.src) {
-              innerCard.appendChild(img);
-            }
+            innerCard.appendChild(img);
           }
         }
       }
@@ -1118,18 +1056,27 @@
         localStorage.setItem("currentSKU", currentSKU);
         errorMessage.style.display = "none";
         errorMessage.textContent = "";
+        productTitle.style.display = "none";
+        productTitle.innerHTML = "";
         loading.style.display = "none";
         cancelBtn.style.display = "none";
+        batchDownloadBtn.style.display = "none";
         tableContainer.innerHTML = "";
         testedSKUs = [];
         validSKUs = [];
-        localStorage.setItem("testedSKUs", JSON.stringify(testedSKUs));
-        localStorage.setItem("validSKUs", JSON.stringify(validSKUs));
+        batchSKUs = [];
         isScanning = false;
         showAllSizes = false;
         sizesBtn.textContent = "Sizes";
         sizesBtn.setAttribute("aria-expanded", "false");
         sizesBtn.setAttribute("aria-label", "Show additional image sizes");
+        downloadBtn.style.display = "none";
+        batchSaveBtn.style.display = "none";
+        searchBtn.style.display = "none";
+        batchModal.style.display = "none";
+        batchModalOverlay.style.display = "none";
+        batchSKUInput.value = "";
+        batchError.style.display = "none";
         if (abortController) {
           abortController.abort();
           abortController = null;
@@ -1145,11 +1092,12 @@
         abortController = null;
         isScanning = false;
         cancelBtn.style.display = "none";
-        prevExteriorBtn.disabled = false;
-        nextExteriorBtn.disabled = false;
+        batchDownloadBtn.style.display = batchSKUs.length > 0 ? "inline-block" : "none";
         loading.style.display = "none";
         errorMessage.style.display = "none";
         errorMessage.textContent = "";
+        productTitle.style.display = "none";
+        productTitle.innerHTML = "";
         currentSKU = lastSKU;
         skuInput.value = currentSKU;
         localStorage.setItem("currentSKU", currentSKU);
