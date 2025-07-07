@@ -1,5 +1,6 @@
 const fetch = require('node-fetch');
-const puppeteer = require('puppeteer');
+const puppeteer = require('puppeteer-core');
+const chromium = require('@sparticuz/chromium');
 
 exports.handler = async function(event) {
   const { sku, size, type, action } = event.queryStringParameters || {};
@@ -8,21 +9,25 @@ exports.handler = async function(event) {
     console.log(`Fetching product page for SKU: ${sku}`);
     try {
       const browser = await puppeteer.launch({
-        headless: true,
-        args: ['--no-sandbox', '--disable-setuid-sandbox']
+        args: chromium.args,
+        executablePath: await chromium.executablePath,
+        headless: chromium.headless
       });
       const page = await browser.newPage();
       const url = `https://www.ifsta.org/shop/product/${sku}`;
       await page.goto(url, { waitUntil: 'networkidle2', timeout: 30000 });
       
-      const title = await page.evaluate(() => {
-        const element = document.querySelector('#node-2079 > div > div.row.product > div:nth-child(2) > h2');
-        return element ? element.textContent.trim() : null;
+      const data = await page.evaluate(() => {
+        const title = document.querySelector('#node-2079 > div > div.row.product > div:nth-child(2) > h2')?.textContent.trim();
+        const price = document.querySelector('.product-price .price-amount')?.textContent.trim();
+        const description = document.querySelector('.product-description')?.textContent.trim().slice(0, 100);
+        const categories = Array.from(document.querySelectorAll('.product-categories a')).map(el => el.textContent.trim());
+        return { title, price, description, categories: categories.join(', ') || null };
       });
       
       await browser.close();
       
-      if (!title) {
+      if (!data.title) {
         console.log(`No title found for SKU ${sku}`);
         return {
           statusCode: 404,
@@ -31,11 +36,11 @@ exports.handler = async function(event) {
         };
       }
       
-      console.log(`Title fetched for SKU ${sku}: ${title}`);
+      console.log(`Data fetched for SKU ${sku}: ${JSON.stringify(data)}`);
       return {
         statusCode: 200,
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ title })
+        body: JSON.stringify(data)
       };
     } catch (error) {
       console.error(`Error fetching product page for SKU ${sku}: ${error.message}`);
