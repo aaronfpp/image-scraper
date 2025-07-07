@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>ImageScraper by Tate</title>
-    <link rel="icon" type="image/x-icon" href="/favicon.ico">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
     <style>
       html, body {
@@ -151,17 +150,34 @@
         background-color: #8e1c13;
       }
       
-      #theme-btn, #download-btn, #batch-save-btn, #search-btn {
+      #theme-btn {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        background-color: #17a2b8;
+        font-size: 12pt;
+        padding: 8px;
+      }
+      
+      #theme-btn:hover {
+        background-color: #138496;
+      }
+      
+      .dark-theme #theme-btn {
+        background-color: #b32318;
+      }
+      
+      .dark-theme #theme-btn:hover {
+        background-color: #8e1c13;
+      }
+      
+      #download-btn, #batch-save-btn, #add-sku-btn {
         position: absolute;
         top: 10px;
         background-color: #17a2b8;
         font-size: 12pt;
         padding: 8px;
         display: none;
-      }
-      
-      #theme-btn {
-        right: 10px;
       }
       
       #download-btn {
@@ -172,106 +188,42 @@
         right: 90px;
       }
       
-      #search-btn {
+      #add-sku-btn {
         right: 130px;
       }
       
-      #theme-btn:hover, #download-btn:hover, #batch-save-btn:hover, #search-btn:hover {
+      #download-btn:hover, #batch-save-btn:hover, #add-sku-btn:hover {
         background-color: #138496;
       }
       
-      .dark-theme #theme-btn, .dark-theme #download-btn, .dark-theme #batch-save-btn, .dark-theme #search-btn {
+      .dark-theme #download-btn, .dark-theme #batch-save-btn, .dark-theme #add-sku-btn {
         background-color: #b32318;
       }
       
-      .dark-theme #theme-btn:hover, .dark-theme #download-btn:hover, .dark-theme #batch-save-btn:hover, .dark-theme #search-btn:hover {
+      .dark-theme #download-btn:hover, .dark-theme #batch-save-btn:hover, .dark-theme #add-sku-btn:hover {
         background-color: #8e1c13;
       }
       
-      #theme-label {
+      #search-btn {
         position: absolute;
-        top: 12px;
-        right: 50px;
+        top: 10px;
+        right: 170px;
+        background-color: #17a2b8;
         font-size: 12pt;
-        color: #000000;
-      }
-      
-      .dark-theme #theme-label {
-        color: #ffffff;
-      }
-      
-      #batch-modal {
-        display: none;
-        position: fixed;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-        background-color: #ffffff;
-        padding: 20px;
-        border-radius: 5px;
-        box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
-        z-index: 1000;
-        max-width: 500px;
-        width: 90%;
-      }
-      
-      .dark-theme #batch-modal {
-        background-color: #333333;
-        color: #ffffff;
-      }
-      
-      #batch-modal-overlay {
-        display: none;
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background-color: rgba(0, 0, 0, 0.5);
-        z-index: 999;
-      }
-      
-      #batch-sku-input {
-        font-size: 14pt;
-        margin: 10px 0;
-        padding: 5px;
-        width: 100%;
-        color: #000000;
-      }
-      
-      .dark-theme #batch-sku-input {
-        background-color: #444444;
-        color: #ffffff;
-        border: 1px solid #ffffff;
-      }
-      
-      #batch-error {
-        color: red;
-        font-size: 12pt;
-        margin: 10px 0;
+        padding: 8px;
         display: none;
       }
       
-      .dark-theme #batch-error {
-        color: #ff9999;
+      #search-btn:hover {
+        background-color: #138496;
       }
       
-      #batch-sku-list {
-        max-height: 200px;
-        overflow-y: auto;
-        margin: 10px 0;
-        padding: 10px;
-        background-color: #f0f0f0;
-        border: 1px solid #cccccc;
+      .dark-theme #search-btn {
+        background-color: #b32318;
       }
       
-      .dark-theme #batch-sku-list {
-        background-color: #444444;
-        border: 1px solid #ffffff;
-      }
-      
-      #batch-sku-list div {
-        margin: 5px 0;
+      .dark-theme #search-btn:hover {
+        background-color: #8e1c13;
       }
       
       img {
@@ -347,9 +299,9 @@
     <main>
       <button id="search-btn" class="btn" aria-label="Search IFSTA for SKU"><i class="fas fa-globe"></i></button>
       <button id="download-btn" class="btn" aria-label="Download PNG images as ZIP"><i class="fas fa-cloud-arrow-down"></i></button>
-      <button id="batch-save-btn" class="btn" aria-label="Open batch SKU modal"><i class="fas fa-save"></i></button>
+      <button id="batch-save-btn" class="btn" aria-label="Batch Save SKUs"><i class="fas fa-save"></i></button>
+      <button id="add-sku-btn" class="btn" aria-label="Add SKU"><i class="fas fa-plus"></i></button>
       <button id="theme-btn" class="btn" aria-label="Switch to dark theme"><i class="fas fa-paint-brush"></i></button>
-      <span id="theme-label">Theme</span>
       <h1>Welcome to ImageScraper!</h1>
       <h2>By Tate</h2>
       <div id="formID">
@@ -368,15 +320,6 @@
       <div id="product-title"></div>
       <div id="tableID"></div>
       <div id="loading">Loading...</div>
-      <div id="batch-modal-overlay"></div>
-      <div id="batch-modal">
-        <h3>Batch SKUs</h3>
-        <input type="text" id="batch-sku-input" placeholder="Enter SKUs (comma-separated)">
-        <div id="batch-error"></div>
-        <div id="batch-sku-list"></div>
-        <button id="batch-add-btn" class="btn">Add SKUs</button>
-        <button id="batch-cancel-btn" class="btn">Cancel</button>
-      </div>
       <div id="checked-skus">Checked SKUs (no images): None</div>
       <div id="valid-skus-range">Known SKUs with images: None</div>
     </main>
@@ -398,15 +341,9 @@
       
       const themeBtn = document.getElementById("theme-btn");
       const downloadBtn = document.getElementById("download-btn");
-      const searchBtn = document.getElementById("search-btn");
       const batchSaveBtn = document.getElementById("batch-save-btn");
-      const batchModal = document.getElementById("batch-modal");
-      const batchModalOverlay = document.getElementById("batch-modal-overlay");
-      const batchSKUInput = document.getElementById("batch-sku-input");
-      const batchAddBtn = document.getElementById("batch-add-btn");
-      const batchCancelBtn = document.getElementById("batch-cancel-btn");
-      const batchSKUList = document.getElementById("batch-sku-list");
-      const batchError = document.getElementById("batch-error");
+      const addSKUBtn = document.getElementById("add-sku-btn");
+      const searchBtn = document.getElementById("search-btn");
       const sizesBtn = document.getElementById("sizes-btn");
       const prevExteriorBtn = document.getElementById("prev-exterior-btn");
       const nextExteriorBtn = document.getElementById("next-exterior-btn");
@@ -416,13 +353,13 @@
       const submitBtn = document.getElementById("submit-btn");
       const clearBtn = document.getElementById("clear-btn");
       const cancelBtn = document.getElementById("cancel-btn");
+      const batchDownloadBtn = document.getElementById("batch-download-btn");
       const errorMessage = document.getElementById("error-message");
       const productTitle = document.getElementById("product-title");
       const loading = document.getElementById("loading");
       const tableContainer = document.getElementById("tableID");
       const checkedSKUsDisplay = document.getElementById("checked-skus");
       const validSKUsRangeDisplay = document.getElementById("valid-skus-range");
-      const themeLabel = document.getElementById("theme-label");
       
       let testedSKUs = [];
       let validSKUs = [];
@@ -440,10 +377,8 @@
       
       themeBtn.addEventListener("click", toggleTheme);
       downloadBtn.addEventListener("click", downloadImagesAsZip);
-      batchSaveBtn.addEventListener("click", openBatchModal);
-      batchAddBtn.addEventListener("click", addBatchSKUs);
-      batchCancelBtn.addEventListener("click", closeBatchModal);
-      batchModalOverlay.addEventListener("click", closeBatchModal);
+      batchSaveBtn.addEventListener("click", batchSaveSKUs);
+      addSKUBtn.addEventListener("click", addSKU);
       searchBtn.addEventListener("click", searchIFSTA);
       sizesBtn.addEventListener("click", toggleSizes);
       prevExteriorBtn.addEventListener("click", () => navigateSKU(-1));
@@ -464,66 +399,56 @@
         isDarkTheme = !isDarkTheme;
         document.body.classList.toggle("dark-theme");
         themeBtn.setAttribute("aria-label", isDarkTheme ? "Switch to light theme" : "Switch to dark theme");
-        themeLabel.textContent = isDarkTheme ? "Light" : "Dark";
       }
       
-      function openBatchModal() {
-        batchModal.style.display = "block";
-        batchModalOverlay.style.display = "block";
-        batchSKUInput.value = batchSKUs.join(", ");
-        updateBatchSKUList();
-      }
-      
-      function closeBatchModal() {
-        batchModal.style.display = "none";
-        batchModalOverlay.style.display = "none";
-        batchError.style.display = "none";
-        batchSKUInput.value = "";
-      }
-      
-      function updateBatchSKUList() {
-        batchSKUList.innerHTML = batchSKUs.length > 0
-          ? batchSKUs.map(sku => `<div>${sku}</div>`).join("")
-          : "<div>No SKUs added</div>";
-      }
-      
-      async function addBatchSKUs() {
-        const input = batchSKUInput.value.trim();
-        batchError.style.display = "none";
-        batchError.textContent = "";
-        
-        if (!input) {
-          batchError.textContent = "Error: Please enter at least one SKU.";
-          batchError.style.display = "block";
-          return;
-        }
-        
-        const skus = input.split(",").map(s => s.trim()).filter(s => s);
-        const invalidSKUs = skus.filter(sku => !section.validationRegex.test(sku));
-        if (invalidSKUs.length > 0) {
-          batchError.textContent = `Error: Invalid SKUs: ${invalidSKUs.join(", ")}. SKUs must be 5-digit numbers.`;
-          batchError.style.display = "block";
-          return;
-        }
-        
-        const uniqueNewSKUs = skus.filter(sku => !batchSKUs.includes(sku));
-        if (uniqueNewSKUs.length === 0) {
-          batchError.textContent = "Error: All entered SKUs are already in the batch.";
-          batchError.style.display = "block";
-          return;
-        }
-        
-        batchSKUs.push(...uniqueNewSKUs);
-        updateBatchSKUList();
-        batchSKUInput.value = "";
-        batchDownloadBtn.style.display = batchSKUs.length > 0 ? "inline-block" : "none";
-        batchError.textContent = `Added ${uniqueNewSKUs.length} SKU(s) to batch.`;
-        batchError.style.display = "block";
+      function toggleSizes() {
+        showAllSizes = !showAllSizes;
+        sizesBtn.textContent = showAllSizes ? "Hide Sizes" : "Sizes";
+        sizesBtn.setAttribute("aria-expanded", showAllSizes);
+        sizesBtn.setAttribute("aria-label", showAllSizes ? "Hide additional image sizes" : "Show additional image sizes");
+        downloadBtn.style.display = showAllSizes ? "inline-block" : "none";
+        batchSaveBtn.style.display = showAllSizes ? "inline-block" : "none";
+        addSKUBtn.style.display = showAllSizes ? "inline-block" : "none";
+        searchBtn.style.display = showAllSizes ? "inline-block" : "none";
+        displayImages(currentSKU);
       }
       
       function searchIFSTA() {
         const searchUrl = `https://www.ifsta.org/shop/product/${currentSKU}`;
         window.open(searchUrl, '_blank');
+      }
+      
+      async function batchSaveSKUs() {
+        errorMessage.style.display = "none";
+        errorMessage.textContent = "";
+        batchSKUs = [...new Set(validSKUs)]; // Save unique valid SKUs
+        console.log(`Batch saved: ${batchSKUs.join(", ")}`);
+        errorMessage.textContent = `Batch saved: ${batchSKUs.length} SKUs (${batchSKUs.join(", ")})`;
+        errorMessage.style.display = "block";
+        batchDownloadBtn.style.display = batchSKUs.length > 0 ? "inline-block" : "none";
+      }
+      
+      async function addSKU() {
+        const input = skuInput.value.trim();
+        errorMessage.style.display = "none";
+        errorMessage.textContent = "";
+        
+        if (!section.validationRegex.test(input)) {
+          errorMessage.textContent = "Error: SKU must be a 5-digit number (e.g., 12345).";
+          errorMessage.style.display = "block";
+          return;
+        }
+        
+        if (!batchSKUs.includes(input)) {
+          batchSKUs.push(input);
+          console.log(`Added SKU ${input} to batch`);
+          errorMessage.textContent = `Added SKU ${input} to batch. Current batch: ${batchSKUs.join(", ")}`;
+          errorMessage.style.display = "block";
+          batchDownloadBtn.style.display = "inline-block";
+        } else {
+          errorMessage.textContent = `SKU ${input} already in batch.`;
+          errorMessage.style.display = "block";
+        }
       }
       
       async function batchDownloadSKUs() {
@@ -929,19 +854,14 @@
         const totalImages = displaySizes.length * section.fileTypes.length;
         const missingImages = [];
         
-        // Fetch product title and additional data
+        // Fetch product title
         try {
           const response = await fetch(`/api/fetch-image?sku=${sku}&action=getProductTitle`, { method: "GET" });
           console.log(`Fetching title for SKU ${sku}: Status ${response.status}`);
           if (response.ok) {
             const data = await response.json();
             if (data.title) {
-              productTitle.innerHTML = `
-                <p><strong>Product:</strong> ${data.title}</p>
-                ${data.price ? `<p><strong>Price:</strong> ${data.price}</p>` : ''}
-                ${data.description ? `<p><strong>Description:</strong> ${data.description}</p>` : ''}
-                ${data.categories ? `<p><strong>Categories:</strong> ${data.categories}</p>` : ''}
-              `;
+              productTitle.innerHTML = `<p><strong>Product:</strong> ${data.title}</p>`;
               productTitle.style.display = "block";
             } else {
               console.log(`No title returned for SKU ${sku}`);
@@ -1072,11 +992,8 @@
         sizesBtn.setAttribute("aria-label", "Show additional image sizes");
         downloadBtn.style.display = "none";
         batchSaveBtn.style.display = "none";
+        addSKUBtn.style.display = "none";
         searchBtn.style.display = "none";
-        batchModal.style.display = "none";
-        batchModalOverlay.style.display = "none";
-        batchSKUInput.value = "";
-        batchError.style.display = "none";
         if (abortController) {
           abortController.abort();
           abortController = null;
