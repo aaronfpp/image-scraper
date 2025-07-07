@@ -2,7 +2,15 @@
   "name": "image-scraper",
   "version": "1.0.0",
   "description": "ImageScraper for IFSTA images",
+  "scripts": {
+    "build": "npm install"
+  },
   "dependencies": {
-    "node-fetch": "2.6.12"
+    "node-fetch": "2.6.12",
+    "puppeteer-core": "^23.5.0",
+    "@sparticuz/chromium": "^123.0.0"
+  },
+  "engines": {
+    "node": "18.x"
   }
 }
