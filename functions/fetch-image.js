@@ -1,3 +1,4 @@
+```javascript
 const fetch = require('node-fetch');
 const puppeteer = require('puppeteer-core');
 const chromium = require('@sparticuz/chromium');
@@ -22,7 +23,9 @@ exports.handler = async function(event) {
 
     while (retryCount < maxRetries) {
       let browser;
+      let page;
       try {
+        console.log(`Attempt ${retryCount + 1} for SKU ${sku}`);
         await new Promise(resolve => setTimeout(resolve, 1000 * Math.pow(2, retryCount)));
         browser = await puppeteer.launch({
           args: chromium.args,
@@ -30,18 +33,17 @@ exports.handler = async function(event) {
           headless: chromium.headless,
           timeout: 15000
         });
-        const page = await browser.newPage();
+        page = await browser.newPage();
         await page.setUserAgent('Mozilla/5.0 (compatible; ImageScraper/1.0)');
         const url = `https://www.ifsta.org/shop/product/${sku}`;
+        console.log(`Navigating to ${url}`);
         await page.goto(url, { waitUntil: 'networkidle2', timeout: 30000 });
         const data = await page.evaluate(() => {
           const title = document.querySelector('#node-2079 > div > div.row.product > div:nth-child(2) > h2')?.textContent?.trim() || null;
           return { title };
         });
-        await page.close();
-        await browser.close();
         if (!data.title) {
-          console.log(`No title found for SKU ${sku}`);
+          console.log(`No title found for SKU ${sku} with selector`);
           return {
             statusCode: 404,
             headers: { 'Content-Type': 'application/json' },
@@ -56,15 +58,17 @@ exports.handler = async function(event) {
         };
       } catch (error) {
         retryCount++;
-        console.error(`Attempt ${retryCount} failed for SKU ${sku}: ${error.message}`);
-        if (browser) await browser.close();
+        console.error(`Attempt ${retryCount} failed for SKU ${sku}: ${error.message}, Stack: ${error.stack}`);
         if (retryCount >= maxRetries) {
           return {
             statusCode: 500,
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ error: `Failed to fetch product page after ${maxRetries} attempts` })
+            body: JSON.stringify({ error: `Failed to fetch product page after ${maxRetries} attempts: ${error.message}` })
           };
         }
+      } finally {
+        if (page) await page.close().catch(err => console.error(`Error closing page: ${err.message}`));
+        if (browser) await browser.close().catch(err => console.error(`Error closing browser: ${err.message}`));
       }
     }
   }
@@ -159,3 +163,4 @@ exports.handler = async function(event) {
     }
   }
 };
+```
