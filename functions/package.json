@@ -1,0 +1,9 @@
+{
+  "name": "image-scraper",
+  "version": "1.0.0",
+  "description": "ImageScraper for IFSTA images",
+  "dependencies": {
+    "node-fetch": "2.6.12",
+    "puppeteer": "^23.5.0"
+  }
+}
