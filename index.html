@@ -314,6 +314,17 @@
         color: #ffffff;
         background-color: rgba(0, 0, 0, 0.8);
       }
+      #product-title {
+      font-size: 14pt;
+      margin-top: 10px;
+      display: none;
+      }
+     .dark-theme #product-title {
+     color: #ffffff;
+     }
+     #product-title p {
+     margin: 5px 0;
+     }
     </style>
   </head>
   <body>
@@ -349,6 +360,7 @@
         <button id="cancel-btn" class="btn" aria-label="Cancel ongoing scan">Cancel</button>
       </div>
       <div id="error-message" aria-live="polite"></div>
+      <div id="product-title" aria-live="polite"></div>
       <div id="loading">Loading...</div>
       <div id="tableID"></div>
       <div id="checked-skus">Checked SKUs (no images): None</div>
@@ -984,111 +996,157 @@
         return hasImages;
       }
       
-      async function displayImages(sku) {
-        tableContainer.innerHTML = "";
-        let loadedImages = 0;
-        let failedImages = 0;
-        const displaySizes = showAllSizes ? section.sizes : [section.sizes[0]];
-        const totalImages = displaySizes.length * section.fileTypes.length;
-        const missingImages = [];
+async function displayImages(sku) {
+    // Reset state
+    tableContainer.innerHTML = "";
+    let loadedImages = 0;
+    let failedImages = 0;
+    const missingImages = [];
+    
+    // Early validation
+    if (!sku || typeof sku !== 'string') {
+        throw new Error('Invalid SKU provided');
+    }
+
+    // Create container structure
+    const imgContainer = document.createElement("div");
+    imgContainer.classList.add("img-container");
+    tableContainer.appendChild(imgContainer);
+
+    // Calculate total images
+    const displaySizes = showAllSizes ? section.sizes : [section.sizes[0]];
+    const totalImages = displaySizes.length * section.fileTypes.length;
+
+    // Helper functions
+    const createImageElement = (heading, imageUrl) => {
+        const img = document.createElement("img");
+        img.alt = `${heading} for SKU ${sku}`;
+        img.classList.add("default-image");
+        return img;
+    };
+
+    const handleImageError = (heading, errorText) => {
+        failedImages++;
+        missingImages.push(heading);
         
-        const imgContainer = document.createElement("div");
-        imgContainer.classList.add("img-container");
-        tableContainer.appendChild(imgContainer);
+        const errorDiv = document.createElement("div");
+        errorDiv.classList.add("image-error");
+        errorDiv.textContent = errorText;
+        return errorDiv;
+    };
+
+    const updateCompletionStatus = () => {
+        loading.style.display = "none";
         
-        for (const size of displaySizes) {
-          for (const type of section.fileTypes) {
-            const innerCard = document.createElement("div");
-            innerCard.classList.add("inner-card");
-            imgContainer.appendChild(innerCard);
-            
-            const heading = `${size}${type}`;
-            const imageUrl = `${section.baseURL}${sku}/${size}${type}`;
-            innerCard.innerHTML += `<h3><a href="${imageUrl}" target="_blank" rel="noopener noreferrer">${heading}</a></h3>`;
-            
-            const imgSrc = `/api/fetch-image?sku=${sku}&size=${size}&type=${type}`;
-            const img = document.createElement("img");
-            img.alt = `${heading} for SKU ${sku}`;
-            img.classList.add("default-image");
-            
-            try {
-              const response = await fetch(imgSrc, { method: 'GET' });
-              console.log(`Fetching ${imgSrc}: Status ${response.status}`);
-              if (response.ok) {
-                const data = await response.json();
-                if (data.isBase64Encoded) {
-                  img.src = `data:${data.contentType};base64,${data.body}`;
-                  innerCard.appendChild(img);
-                } else {
-                  throw new Error('Response is not base64 encoded');
-                }
-              } else {
-                throw new Error(`Status ${response.status}`);
-              }
-            } catch (error) {
-              failedImages++;
-              missingImages.push(heading);
-              const errorText = document.createElement("div");
-              errorText.classList.add("image-error");
-              errorText.textContent = `Image not found for ${heading}`;
-              innerCard.appendChild(errorText);
-              console.log(`Failed to load ${imgSrc}: ${error.message}`);
-            }
-            
-            img.onload = () => {
-              loadedImages++;
-              console.log(`Loaded ${imgSrc}`);
-              if (loadedImages + failedImages === totalImages) {
-                loading.style.display = "none";
-                if (loadedImages > 0 && !validSKUs.includes(sku)) {
-                  validSKUs.push(sku);
-                  localStorage.setItem("validSKUs", JSON.stringify(validSKUs));
-                  updateInteriorButtonState();
-                  updateValidSKUsRange();
-                }
-                if (loadedImages === 0) {
-                  errorMessage.textContent = `Error: No images found for SKU ${sku}. The SKU may not exist or the server is unavailable.`;
-                  errorMessage.style.display = "block";
-                } else if (missingImages.length > 0) {
-                  errorMessage.textContent = `Warning: Some images missing for SKU ${sku}: ${missingImages.join(", ")}`;
-                  errorMessage.style.display = "block";
-                }
-              }
-            };
-            
-            img.onerror = () => {
-              failedImages++;
-              missingImages.push(heading);
-              innerCard.removeChild(img);
-              const errorText = document.createElement("div");
-              errorText.classList.add("image-error");
-              errorText.textContent = `Image not found for ${heading}`;
-              innerCard.appendChild(errorText);
-              console.log(`Failed to load ${imgSrc}`);
-              if (loadedImages + failedImages === totalImages) {
-                loading.style.display = "none";
-                if (loadedImages > 0 && !validSKUs.includes(sku)) {
-                  validSKUs.push(sku);
-                  localStorage.setItem("validSKUs", JSON.stringify(validSKUs));
-                  updateInteriorButtonState();
-                  updateValidSKUsRange();
-                }
-                if (loadedImages === 0) {
-                  errorMessage.textContent = `Error: No images found for SKU ${sku}. The SKU may not exist or the server is unavailable.`;
-                  errorMessage.style.display = "block";
-                } else if (missingImages.length > 0) {
-                  errorMessage.textContent = `Warning: Some images missing for SKU ${sku}: ${missingImages.join(", ")}`;
-                  errorMessage.style.display = "block";
-                }
-              }
-            };
-            
-            if (img.src) {
-              innerCard.appendChild(img);
-            }
-          }
+        if (loadedImages === 0) {
+            errorMessage.textContent = `Error: No images found for SKU ${sku}. The SKU may not exist or the server is unavailable.`;
+            errorMessage.style.display = "block";
+            return;
         }
-      }
+        
+        if (missingImages.length > 0) {
+            errorMessage.textContent = `Warning: Some images missing for SKU ${sku}: ${missingImages.join(", ")}`;
+            errorMessage.style.display = "block";
+        }
+
+        if (loadedImages > 0 && !validSKUs.includes(sku)) {
+            validSKUs.push(sku);
+            localStorage.setItem("validSKUs", JSON.stringify(validSKUs));
+            updateInteriorButtonState();
+            updateValidSKUsRange();
+        }
+    };
+
+    try {
+        // Process images
+        for (const size of displaySizes) {
+            for (const type of section.fileTypes) {
+                const innerCard = document.createElement("div");
+                innerCard.classList.add("inner-card");
+                imgContainer.appendChild(innerCard);
+
+                const heading = `${size}${type}`;
+                const imageUrl = `${section.baseURL}${sku}/${size}${type}`;
+
+                // Add heading
+                innerCard.innerHTML += `<h3><a href="${imageUrl}" target="_blank" rel="noopener noreferrer">${heading}</a></h3>`;
+
+                // Fetch image
+                const imgSrc = `/api/fetch-image?sku=${sku}&size=${size}&type=${type}`;
+                
+                try {
+                    const response = await fetch(imgSrc, { method: 'GET' });
+                    
+                    if (!response.ok) {
+                        throw new Error(`Failed to fetch image: Status ${response.status}`);
+                    }
+
+                    const data = await response.json();
+
+                    if (!data.isBase64Encoded) {
+                        throw new Error('Response is not base64 encoded');
+                    }
+
+                    const img = createImageElement(heading, imageUrl);
+                    img.src = `data:${data.contentType};base64,${data.body}`;
+                    innerCard.appendChild(img);
+
+                    img.onload = () => {
+                        loadedImages++;
+                        console.log(`Loaded ${imgSrc}`);
+                        
+                        if (loadedImages + failedImages === totalImages) {
+                            updateCompletionStatus();
+                        }
+                    };
+
+                    img.onerror = () => {
+                        const errorDiv = handleImageError(heading, `Image not found for ${heading}`);
+                        innerCard.removeChild(img);
+                        innerCard.appendChild(errorDiv);
+                        
+                        if (loadedImages + failedImages === totalImages) {
+                            updateCompletionStatus();
+                        }
+                    };
+
+                } catch (error) {
+                    const errorDiv = handleImageError(heading, `Failed to load ${heading}: ${error.message}`);
+                    innerCard.appendChild(errorDiv);
+                    
+                    if (loadedImages + failedImages === totalImages) {
+                        updateCompletionStatus();
+                    }
+                }
+            }
+        }
+
+        // Fetch product title
+        try {
+            const response = await fetch(`/api/fetch-image?sku=${sku}&action=getProductTitle`, { method: "GET" });
+            
+            if (!response.ok) {
+                throw new Error(`Failed to fetch product title: Status ${response.status}`);
+            }
+
+            const data = await response.json();
+            
+            if (data.title) {
+                productTitle.style.display = "none";
+                productTitle.innerHTML = `<p><strong>Product:</strong> ${data.title}</p>`;
+                productTitle.style.display = "block";
+            }
+        } catch (error) {
+            console.error(`Error fetching title for SKU ${sku}: ${error.message}`);
+        }
+
+    } catch (error) {
+        console.error(`Critical error in displayImages: ${error.message}`);
+        loading.style.display = "none";
+        errorMessage.textContent = `An error occurred while processing images: ${error.message}`;
+        errorMessage.style.display = "block";
+    }
+}
       
       function updateCheckedSKUsDisplay() {
         if (testedSKUs.length === 0) {
