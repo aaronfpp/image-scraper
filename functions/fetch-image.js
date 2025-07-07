@@ -1,7 +1,52 @@
 const fetch = require('node-fetch');
+const puppeteer = require('puppeteer');
 
 exports.handler = async function(event) {
-  const { sku, size, type } = event.queryStringParameters || {};
+  const { sku, size, type, action } = event.queryStringParameters || {};
+
+  if (action === 'getProductTitle') {
+    console.log(`Fetching product page for SKU: ${sku}`);
+    try {
+      const browser = await puppeteer.launch({
+        headless: true,
+        args: ['--no-sandbox', '--disable-setuid-sandbox']
+      });
+      const page = await browser.newPage();
+      const url = `https://www.ifsta.org/shop/product/${sku}`;
+      await page.goto(url, { waitUntil: 'networkidle2', timeout: 30000 });
+      
+      const title = await page.evaluate(() => {
+        const element = document.querySelector('#node-2079 > div > div.row.product > div:nth-child(2) > h2');
+        return element ? element.textContent.trim() : null;
+      });
+      
+      await browser.close();
+      
+      if (!title) {
+        console.log(`No title found for SKU ${sku}`);
+        return {
+          statusCode: 404,
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ error: 'Product title not found' })
+        };
+      }
+      
+      console.log(`Title fetched for SKU ${sku}: ${title}`);
+      return {
+        statusCode: 200,
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ title })
+      };
+    } catch (error) {
+      console.error(`Error fetching product page for SKU ${sku}: ${error.message}`);
+      return {
+        statusCode: 500,
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ error: `Failed to fetch product page: ${error.message}` })
+      };
+    }
+  }
+
   if (!sku || !size || !type) {
     console.error('Missing query parameters: sku, size, or type');
     return {
@@ -12,7 +57,7 @@ exports.handler = async function(event) {
   }
 
   const url = `https://images.ifsta.org/products/${sku}/${size}${type}`;
-  console.log(`Fetching URL: ${url}`);
+  console.log(`Fetching image URL: ${url}`);
   try {
     const response = await fetch(url, {
       method: 'GET',
