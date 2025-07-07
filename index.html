@@ -1038,9 +1038,7 @@ async function displayImages(sku) {
     imgContainer.classList.add("img-container");
     tableContainer.appendChild(imgContainer);
 
-    // Calculate total images
-    const displaySizes = showAllSizes ? section.sizes : [section.sizes[0]];
-    const totalImages = displaySizes.length * section.fileTypes.length;
+
 
     // Helper functions
     const createImageElement = (heading, imageUrl) => {
