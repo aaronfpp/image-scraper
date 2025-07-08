@@ -1120,6 +1120,7 @@ async function displayImages(sku) {
                 }
             }
         }
+    }
       
       function updateCheckedSKUsDisplay() {
         if (testedSKUs.length === 0) {
@@ -1187,7 +1188,6 @@ async function displayImages(sku) {
         console.log(`Scan cancelled, reverting to SKU ${currentSKU}`);
         displayImages(currentSKU);
       }
-    }
     </script>
   </body>
 </html>
