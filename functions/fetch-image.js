@@ -2,7 +2,31 @@ const fetch = require('node-fetch');
 const cheerio = require('cheerio');
 
 exports.handler = async function(event) {
-  const { sku, size, type } = event.queryStringParameters || {};
+  const { sku, size, type, action } = event.queryStringParameters || {};
+  console.log(`Received query parameters: ${JSON.stringify(event.queryStringParameters)}`);
+
+  // Handle title scraping request
+  if (action === 'getProductTitle') {
+    if (!sku || !/^[0-9]{5}$/.test(String(sku).trim())) {
+      console.error(`Invalid or missing SKU for getProductTitle: ${sku}`);
+      return {
+        statusCode: 400,
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ error: 'Invalid or missing SKU: Must be a 5-digit number' })
+      };
+    }
+
+    console.log(`Processing title scrape for SKU: ${sku}`);
+    const result = await scrapeIFSTAPage(sku);
+    return {
+      statusCode: result.statusCode,
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(result.body)
+    };
+  }
+
+  // Handle image fetching request
+  console.log(`Processing image fetch request`);
   if (!sku || !size || !type) {
     console.error('Missing query parameters: sku, size, or type');
     return {
