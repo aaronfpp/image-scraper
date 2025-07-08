@@ -997,65 +997,65 @@
       }
       
 async function displayImages(sku) {
-    // Reset state
-    tableContainer.innerHTML = "";
-    let loadedImages = 0;
-    let failedImages = 0;
-    const missingImages = [];
-    
-    // Early validation
-    if (!sku || typeof sku !== 'string') {
-        throw new Error('Invalid SKU provided');
-    }
+  // Reset state
+  tableContainer.innerHTML = "";
+  let loadedImages = 0;
+  let failedImages = 0;
+  const missingImages = [];
+  
+  // Early validation
+  if (!sku || typeof sku !== 'string') {
+      throw new Error('Invalid SKU provided');
+  }
 
-    // Create container structure
-    const imgContainer = document.createElement("div");
-    imgContainer.classList.add("img-container");
-    tableContainer.appendChild(imgContainer);
+  // Create container structure
+  const imgContainer = document.createElement("div");
+  imgContainer.classList.add("img-container");
+  tableContainer.appendChild(imgContainer);
 
-    // Calculate total images
-    const displaySizes = showAllSizes ? section.sizes : [section.sizes[0]];
-    const totalImages = displaySizes.length * section.fileTypes.length;
+  // Calculate total images
+  const displaySizes = showAllSizes ? section.sizes : [section.sizes[0]];
+  const totalImages = displaySizes.length * section.fileTypes.length;
 
-    // Helper functions
-    const createImageElement = (heading, imageUrl) => {
-        const img = document.createElement("img");
-        img.alt = `${heading} for SKU ${sku}`;
-        img.classList.add("default-image");
-        return img;
-    };
+  // Helper functions
+  const createImageElement = (heading, imageUrl) => {
+      const img = document.createElement("img");
+      img.alt = `${heading} for SKU ${sku}`;
+      img.classList.add("default-image");
+      return img;
+  };
 
-    const handleImageError = (heading, errorText) => {
-        failedImages++;
-        missingImages.push(heading);
-        
-        const errorDiv = document.createElement("div");
-        errorDiv.classList.add("image-error");
-        errorDiv.textContent = errorText;
-        return errorDiv;
-    };
+  const handleImageError = (heading, errorText) => {
+      failedImages++;
+      missingImages.push(heading);
+      
+      const errorDiv = document.createElement("div");
+      errorDiv.classList.add("image-error");
+      errorDiv.textContent = errorText;
+      return errorDiv;
+  };
 
-    const updateCompletionStatus = () => {
-        loading.style.display = "none";
-        
-        if (loadedImages === 0) {
-            errorMessage.textContent = `Error: No images found for SKU ${sku}. The SKU may not exist or the server is unavailable.`;
-            errorMessage.style.display = "block";
-            return;
-        }
-        
-        if (missingImages.length > 0) {
-            errorMessage.textContent = `Warning: Some images missing for SKU ${sku}: ${missingImages.join(", ")}`;
-            errorMessage.style.display = "block";
-        }
+  const updateCompletionStatus = () => {
+      loading.style.display = "none";
+      
+      if (loadedImages === 0) {
+          errorMessage.textContent = `Error: No images found for SKU ${sku}. The SKU may not exist or the server is unavailable.`;
+          errorMessage.style.display = "block";
+          return;
+      }
+      
+      if (missingImages.length > 0) {
+          errorMessage.textContent = `Warning: Some images missing for SKU ${sku}: ${missingImages.join(", ")}`;
+          errorMessage.style.display = "block";
+      }
 
-        if (loadedImages > 0 && !validSKUs.includes(sku)) {
-            validSKUs.push(sku);
-            localStorage.setItem("validSKUs", JSON.stringify(validSKUs));
-            updateInteriorButtonState();
-            updateValidSKUsRange();
-        }
-    };
+      if (loadedImages > 0 && !validSKUs.includes(sku)) {
+          validSKUs.push(sku);
+          localStorage.setItem("validSKUs", JSON.stringify(validSKUs));
+          updateInteriorButtonState();
+          updateValidSKUsRange();
+      }
+  };
 
     try {
         // Process images
