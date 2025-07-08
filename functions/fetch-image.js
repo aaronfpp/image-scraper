@@ -12,6 +12,17 @@ exports.handler = async function(event) {
     };
   }
 
+   // Handle title scraping request
+  if (action === 'getProductTitle') {
+    if (!sku || !/^[0-9]{5}$/.test(String(sku).trim())) {
+      console.error(`Invalid or missing SKU for getProductTitle: ${sku}`);
+      return {
+        statusCode: 400,
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ error: 'Invalid or missing SKU: Must be a 5-digit number' })
+      };
+    }
+  
   const url = `https://images.ifsta.org/products/${sku}/${size}${type}`;
   console.log(`Fetching URL: ${url}`);
   try {
@@ -51,34 +62,54 @@ exports.handler = async function(event) {
 async function scrapeIFSTAPage(sku) {
   try {
     const productUrl = `https://ifsta.org/shop/product/${sku}`;
-    const response = await fetch(productUrl);
-    
+    console.log(`Fetching product page: ${productUrl}`);
+    const response = await fetch(productUrl, {
+      method: 'GET',
+      headers: { 'User-Agent': 'Mozilla/5.0 (compatible; ImageScraper/1.0)' }
+    });
+
+    console.log(`Product page status for SKU ${sku}: ${response.status}`);
     if (!response.ok) {
-      throw new Error(`Failed to fetch product page: ${response.status}`);
+      return {
+        statusCode: response.status === 404 ? 404 : 500,
+        body: { error: `Failed to fetch product page: Status ${response.status}` }
+      };
     }
 
-    const cheerio = require('cheerio');
     const $ = cheerio.load(await response.text());
+    const selectors = [
+      '#node-2079 > div > div.row.product > div:nth-child(2) > h2',
+      'h2.product-title',
+      'h2'
+    ];
 
-    const titleElement = $("#node-2079 > div > div.row.product > div:nth-child(2) > h2");
-    if (!titleElement.length) {
-      throw new Error('Product title element not found');
+    let title = null;
+    for (const selector of selectors) {
+      const element = $(selector).first();
+      if (element.length) {
+        title = element.text().trim();
+        console.log(`Found title for SKU ${sku} with selector ${selector}: ${title}`);
+        break;
+      }
     }
 
-    const title = titleElement.text().trim();
-
-    const imageUrl = $('img.product-image').attr('src');
-    if (!imageUrl) {
-      throw new Error('Product image not found');
+    if (!title) {
+      console.log(`No title found for SKU ${sku}`);
+      return {
+        statusCode: 404,
+        body: { error: 'Product title not found' }
+      };
     }
 
     return {
-      sku,
-      title,
-      imageUrl
+      statusCode: 200,
+      body: { title }
     };
   } catch (error) {
-    console.error(`Error scraping SKU ${sku}:`, error.message);
-    return null;
+    console.error(`Error scraping SKU ${sku}: ${error.message}`);
+    return {
+      statusCode: 500,
+      body: { error: `Error scraping product page: ${error.message}` }
+    };
   }
 }
