@@ -93,7 +93,7 @@ async function scrapeIFSTAPage(sku) {
     console.log(`Fetched HTML length for SKU ${sku}: ${html.length} characters`);
     const $ = cheerio.load(html);
     const selectors = [
-      '#node-2079 > div > div:nth-child(1) > div:nth-child(2) > h2',
+      '[id^="node-"] > div > div:nth-child(1) > div:nth-child(2) > h2',
       'h2.product-title',
       'h2'
     ];
