@@ -98,19 +98,6 @@ const html = await response.text();
       'h2'
     ];
 
-    // Filter titles to avoid random strings
-let title = null;
-for (const selector of selectors) {
-  const element = $(selector).first();
-  console.log(`Selector ${selector} tried for SKU ${sku}: ${element.text().trim() || 'Not found'}`);
-  if (element.length) {
-    const candidate = element.text().trim();
-    if (candidate.length > 5 && !candidate.match(/menu|cart|login|search|home/i)) {
-      title = candidate;
-      break;
-    }
-  }
-}
 
     let title = null;
     for (const selector of selectors) {
