@@ -90,17 +90,15 @@ async function scrapeIFSTAPage(sku) {
     }
 
 const html = await response.text();
-console.log(`Fetched HTML length for SKU ${sku}: ${html.length} characters`);
-const $ = cheerio.load(html);
-const selectors = [
-  '[id^="node-"] > div > div:nth-child(1) > div:nth-child(2) > h2',
-  '[id^="node-"] h2.field--name-title',
-  '.region-content h2:first-of-type',
-  'h2.product-title',
-  'h2'
-];
+    console.log(`Fetched HTML length for SKU ${sku}: ${html.length} characters`);
+    const $ = cheerio.load(html);
+    const selectors = [
+      '[id^="node-"] > div > div:nth-child(1) > div:nth-child(2) > h2',
+      'h2.product-title',
+      'h2'
+    ];
 
-// Filter titles to avoid random strings
+    // Filter titles to avoid random strings
 let title = null;
 for (const selector of selectors) {
   const element = $(selector).first();
