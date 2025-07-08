@@ -7,8 +7,4 @@
   command = "npm run build"
   functions = "functions"
   publish = "."
-  environment = {
-    NODE_VERSION = "18",
-    CI = "false",
-    NODE_ENV = "production"
-  }
+  environment = { NODE_VERSION = "18", CI = "false" }
