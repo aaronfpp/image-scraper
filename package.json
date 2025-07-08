@@ -4,12 +4,11 @@
   "description": "ImageScraper for IFSTA images",
   "scripts": {
     "build": "npm install && npm run prepare",
-    "prepare": "npm run build:chrome || exit 0"
+    "prepare": "npm run build:chrome || exit 0",
+    "build:chrome": "mkdir -p functions/node_modules && npm install cheerio"
   },
   "dependencies": {
     "node-fetch": "2.6.12",
-    "puppeteer-core": "^23.5.0",
-    "@sparticuz/chromium": "^123.0.0",
     "cheerio": "^1.0.0-rc.12"
   },
   "engines": {
