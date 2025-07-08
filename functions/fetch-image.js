@@ -46,3 +46,38 @@ exports.handler = async function(event) {
     };
   }
 };
+
+async function scrapeIFSTAPage(sku) {
+  try {
+    const productUrl = `https://ifsta.org/shop/product/${sku}`;
+    const response = await fetch(productUrl);
+    
+    if (!response.ok) {
+      throw new Error(`Failed to fetch product page: ${response.status}`);
+    }
+
+    const cheerio = require('cheerio');
+    const $ = cheerio.load(await response.text());
+
+    const titleElement = $("#node-2079 > div > div.row.product > div:nth-child(2) > h2");
+    if (!titleElement.length) {
+      throw new Error('Product title element not found');
+    }
+
+    const title = titleElement.text().trim();
+
+    const imageUrl = $('img.product-image').attr('src');
+    if (!imageUrl) {
+      throw new Error('Product image not found');
+    }
+
+    return {
+      sku,
+      title,
+      imageUrl
+    };
+  } catch (error) {
+    console.error(`Error scraping SKU ${sku}:`, error.message);
+    return null;
+  }
+}
