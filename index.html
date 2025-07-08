@@ -1057,70 +1057,72 @@ async function displayImages(sku) {
       }
   };
 
-    try {
-        // Process images
-        for (const size of displaySizes) {
-            for (const type of section.fileTypes) {
-                const innerCard = document.createElement("div");
-                innerCard.classList.add("inner-card");
-                imgContainer.appendChild(innerCard);
+ try {
+    // Process images
+    for (const size of displaySizes) {
+      for (const type of section.fileTypes) {
+        const innerCard = document.createElement("div");
+        innerCard.classList.add("inner-card");
+        imgContainer.appendChild(innerCard);
 
-                const heading = `${size}${type}`;
-                const imageUrl = `${section.baseURL}${sku}/${size}${type}`;
+        const heading = `${size}${type}`;
+        const imageUrl = `${section.baseURL}${sku}/${size}${type}`;
 
-                // Add heading
-                innerCard.innerHTML += `<h3><a href="${imageUrl}" target="_blank" rel="noopener noreferrer">${heading}</a></h3>`;
+        // Add heading
+        innerCard.innerHTML += `<h3><a href="${imageUrl}" target="_blank" rel="noopener noreferrer">${heading}</a></h3>`;
 
-                // Fetch image
-                const imgSrc = `/api/fetch-image?sku=${sku}&size=${size}&type=${type}`;
-                
-                try {
-                    const response = await fetch(imgSrc, { method: 'GET' });
-                    
-                    if (!response.ok) {
-                        throw new Error(`Failed to fetch image: Status ${response.status}`);
-                    }
+        // Fetch image
+        const imgSrc = `/api/fetch-image?sku=${sku}&size=${size}&type=${type}`;
+        
+        try {
+          const response = await fetch(imgSrc, { method: 'GET' });
+          console.log(`Fetching ${imgSrc}: Status ${response.status}`);
+          if (!response.ok) {
+            throw new Error(`Failed to fetch image: Status ${response.status}`);
+          }
 
-                    const data = await response.json();
+          const data = await response.json();
+          if (!data.isBase64Encoded) {
+            throw new Error('Response is not base64 encoded');
+          }
 
-                    if (!data.isBase64Encoded) {
-                        throw new Error('Response is not base64 encoded');
-                    }
+          const img = createImageElement(heading, imageUrl);
+          img.src = `data:${data.contentType};base64,${data.body}`;
+          innerCard.appendChild(img);
 
-                    const img = createImageElement(heading, imageUrl);
-                    img.src = `data:${data.contentType};base64,${data.body}`;
-                    innerCard.appendChild(img);
-
-                    img.onload = () => {
-                        loadedImages++;
-                        console.log(`Loaded ${imgSrc}`);
-                        
-                        if (loadedImages + failedImages === totalImages) {
-                            updateCompletionStatus();
-                        }
-                    };
-
-                    img.onerror = () => {
-                        const errorDiv = handleImageError(heading, `Image not found for ${heading}`);
-                        innerCard.removeChild(img);
-                        innerCard.appendChild(errorDiv);
-                        
-                        if (loadedImages + failedImages === totalImages) {
-                            updateCompletionStatus();
-                        }
-                    };
-
-                } catch (error) {
-                    const errorDiv = handleImageError(heading, `Failed to load ${heading}: ${error.message}`);
-                    innerCard.appendChild(errorDiv);
-                    
-                    if (loadedImages + failedImages === totalImages) {
-                        updateCompletionStatus();
-                    }
-                }
+          img.onload = () => {
+            loadedImages++;
+            console.log(`Loaded ${imgSrc}`);
+            if (loadedImages + failedImages === totalImages) {
+              updateCompletionStatus();
             }
+          };
+
+          img.onerror = () => {
+            const errorDiv = handleImageError(heading, `Image not found for ${heading}`);
+            innerCard.removeChild(img);
+            innerCard.appendChild(errorDiv);
+            if (loadedImages + failedImages === totalImages) {
+              updateCompletionStatus();
+            }
+          };
+
+        } catch (error) {
+          const errorDiv = handleImageError(heading, `Failed to load ${heading}: ${error.message}`);
+          innerCard.appendChild(errorDiv);
+          if (loadedImages + failedImages === totalImages) {
+            updateCompletionStatus();
+          }
         }
+      }
     }
+  } catch (error) {
+    loading.style.display = "none";
+    errorMessage.textContent = `Error: Failed to load images for SKU ${sku}: ${error.message}`;
+    errorMessage.style.display = "block";
+    console.error(`Error in displayImages for SKU ${sku}: ${error.message}`);
+  }
+}
       
       function updateCheckedSKUsDisplay() {
         if (testedSKUs.length === 0) {
