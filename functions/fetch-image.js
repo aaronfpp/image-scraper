@@ -2,7 +2,7 @@ const fetch = require('node-fetch');
 const cheerio = require('cheerio');
 
 exports.handler = async function(event) {
-  const { sku, size, type, action, url } = event.queryStringParameters || {};
+  const { sku, size, type, action, url, index } = event.queryStringParameters || {};
   console.log(`Received query parameters: ${JSON.stringify(event.queryStringParameters)}`);
 
   // Handle title scraping request
@@ -27,8 +27,8 @@ exports.handler = async function(event) {
 
   // Handle site images scraping request
   if (action === 'getSiteImages') {
-    console.log(`Processing site images scrape for URL: ${url}`);
-    const result = await scrapeSiteImages(url);
+    console.log(`Processing site images scrape for URL: ${url}, index: ${index}`);
+    const result = await scrapeSiteImages(url, parseInt(index) || 0);
     return {
       statusCode: result.statusCode,
       headers: { 'Content-Type': 'application/json' },
@@ -167,7 +167,7 @@ async function scrapeIFSTAPage(sku) {
   }
 }
 
-async function scrapeSiteImages(pageUrl) {
+async function scrapeSiteImages(pageUrl, index) {
   try {
     if (!pageUrl || !pageUrl.startsWith('https://www.ifsta.org/')) {
       console.error(`Invalid or missing URL: ${pageUrl}`);
@@ -205,7 +205,8 @@ async function scrapeSiteImages(pageUrl) {
       }
     });
 
-    // Validate image URLs and return the first valid one
+    // Validate image URLs and select the one at index
+    const validImages = [];
     for (const url of imageUrls) {
       try {
         const headResponse = await fetch(url, {
@@ -213,11 +214,8 @@ async function scrapeSiteImages(pageUrl) {
           headers: { 'User-Agent': 'Mozilla/5.0 (compatible; ImageScraper/1.0)' }
         });
         if (headResponse.ok && headResponse.headers.get('content-type').startsWith('image/')) {
+          validImages.push(url);
           console.log(`Valid image found: ${url}`);
-          return {
-            statusCode: 200,
-            body: { image: url }
-          };
         } else {
           console.log(`Invalid image URL: ${url}, status: ${headResponse.status}`);
         }
@@ -226,10 +224,25 @@ async function scrapeSiteImages(pageUrl) {
       }
     }
 
-    console.log('No valid images found on page');
+    if (validImages.length === 0) {
+      console.log('No valid images found on page');
+      return {
+        statusCode: 404,
+        body: { error: 'No valid images found' }
+      };
+    }
+
+    if (index >= validImages.length) {
+      console.log(`No image at index ${index}; only ${validImages.length} images found`);
+      return {
+        statusCode: 404,
+        body: { error: `No image at index ${index}` }
+      };
+    }
+
     return {
-      statusCode: 404,
-      body: { error: 'No valid images found' }
+      statusCode: 200,
+      body: { image: validImages[index] }
     };
   } catch (error) {
     console.error(`Error scraping images for ${pageUrl}: ${error.message}`);
