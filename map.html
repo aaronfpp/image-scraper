@@ -3,7 +3,14 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>IFSTA Sitemap Navigator</title>
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>ImageScraper by Tate</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+  <link rel="icon" href="/icons/favicon.ico" type="image/x-icon" sizes="16x16 32x32">
+  <link rel="icon" type="image/png" sizes="16x16" href="/icons/favicon-16x16.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/icons/favicon-32x32.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="/icons/apple-touch-icon.png">
+  <link rel="manifest" href="/icons/site.webmanifest">
   <style>
     html, body {
       font-family: Arial, sans-serif;
@@ -89,6 +96,17 @@
     .dark-theme .btn:disabled {
       color: #999999;
     }
+    #theme-btn {
+      margin-bottom: 10px;
+    }
+    #theme-label {
+      font-size: 14pt;
+      margin-bottom: 10px;
+      display: inline-block;
+    }
+    .dark-theme #theme-label {
+      color: #ffffff;
+    }
     #error-message {
       color: red;
       font-size: 14pt;
@@ -111,7 +129,11 @@
 </head>
 <body>
   <div class="container">
-    <h1>IFSTA Sitemap Navigator</h1>
+    <h1>ImageScraper by Tate - Sitemap Navigator</h1>
+    <button id="theme-btn" class="btn" onclick="toggleTheme()" aria-label="Switch to Alternative 1 background">
+      <i class="fas fa-adjust"></i> Toggle Theme
+    </button>
+    <span id="theme-label">Theme: Default</span>
     <div class="navigator">
       <button id="prevButton" class="btn" onclick="navigate(-1)" disabled>← Prev</button>
       <input type="text" id="urlInput" readonly placeholder="Loading URLs...">
@@ -120,11 +142,46 @@
     <div id="status"></div>
     <div id="error-message"></div>
   </div>
-  <footer>
-    &copy; 2025 IFSTA Image Scraper
-  </footer>
+  <footer id="footer" aria-label="IFSTA Copyright 2025">IFSTA © 2025 https://github.com/aaronfpp/image-scraper</footer>
 
-  <script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+  <script type="text/javascript">
+    const section = {
+      baseURL: "https://images.ifsta.org/products/",
+      sizes: ["default", "thumb", "69", "100", "130", "150", "180", "200", "200x200", "420"],
+      fileTypes: [".png", ".webp"],
+      inputLabel: "SKU",
+      validationRegex: /^[0-9]{5}$/,
+      fetchTimeout: 10000
+    };
+
+    const backgrounds = [
+      { name: "Default", url: "" },
+      { name: "Alternative 1", url: "/images/background_alt1.jpg" },
+      { name: "Alternative 2", url: "/images/background_alt2.jpg" },
+      { name: "Alternative 3", url: "/images/background_e8.jpg" }
+    ];
+
+    let currentBackgroundIndex = parseInt(localStorage.getItem('currentBackgroundIndex')) || 0;
+    const themeBtn = document.getElementById("theme-btn");
+    const themeLabel = document.getElementById("theme-label");
+
+    function toggleTheme() {
+      currentBackgroundIndex = (currentBackgroundIndex + 1) % backgrounds.length;
+      localStorage.setItem("currentBackgroundIndex", currentBackgroundIndex);
+      updateTheme();
+    }
+
+    function updateTheme() {
+      const isDarkTheme = currentBackgroundIndex !== 0;
+      document.body.classList.toggle("dark-theme", isDarkTheme);
+      const bgUrl = backgrounds[currentBackgroundIndex].url ? `url('${backgrounds[currentBackgroundIndex].url}')` : 'none';
+      document.documentElement.style.setProperty('--background-image', bgUrl);
+      themeBtn.setAttribute("aria-label", `Switch to ${backgrounds[(currentBackgroundIndex + 1) % backgrounds.length].name} background`);
+      themeLabel.textContent = `Theme: ${backgrounds[currentBackgroundIndex].name}`;
+    }
+
     document.addEventListener('DOMContentLoaded', () => {
       const urlInput = document.getElementById('urlInput');
       const prevButton = document.getElementById('prevButton');
@@ -181,7 +238,8 @@
         localStorage.setItem('sitemapCurrentIndex', currentIndex);
       };
 
-      // Load URLs on page load
+      // Apply theme and load URLs on page load
+      updateTheme();
       loadSitemapUrls();
     });
   </script>
