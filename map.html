@@ -103,7 +103,7 @@
     .dark-theme .btn:disabled {
       color: #999999;
     }
-    #imageCheckButton {
+    #imageCheckButton, #clearButton {
       min-width: auto;
       padding: 8px 15px;
       font-size: 12pt;
@@ -211,10 +211,12 @@
         <i class="fas fa-globe"></i>
       </button>
       <button id="imageCheckButton" class="btn" onclick="checkImage()" disabled title="Check for Image">Image Check</button>
+      <button id="clearButton" class="btn" onclick="clearTable()" title="Clear Table">Clear</button>
     </div>
     <table id="imageTable">
       <thead>
         <tr>
+          <th>Index</th>
           <th>Thumbnail</th>
           <th>Image URL</th>
         </tr>
@@ -230,7 +232,7 @@
       { name: "Default", url: "" },
       { name: "Alternative 1", url: "/images/background_alt1.jpg" },
       { name: "Alternative 2", url: "/images/background_alt2.jpg" },
-      { name: "Alternative 3", url: "/images/background_e8.jpg" } // Fixed typo
+      { name: "Alternative 3", url: "/images/background_e8.jpg" }
     ];
 
     let currentBackgroundIndex = parseInt(localStorage.getItem('currentBackgroundIndex')) || 0;
@@ -249,6 +251,10 @@
       }
     }
 
+    let urls = [];
+    let currentIndex = parseInt(localStorage.getItem('sitemapCurrentIndex')) || 0;
+    let checkedImages = []; // { url: string, image: string, index: number }
+
     window.checkImage = async function() {
       const urlInput = document.getElementById('urlInput');
       const imageCheckButton = document.getElementById('imageCheckButton');
@@ -263,27 +269,33 @@
         return;
       }
 
+      // Find the next image index for this URL
+      const urlImages = checkedImages.filter(img => img.url === currentUrl);
+      const nextIndex = urlImages.length;
+
       errorDiv.style.display = 'none';
       imageCheckButton.disabled = true;
-      statusDiv.textContent = `Checking for images on ${currentUrl}...`;
+      statusDiv.textContent = `Checking for image ${nextIndex + 1} on ${currentUrl}...`;
 
       try {
-        const response = await fetch(`/api/fetch-image?action=getSiteImages&url=${encodeURIComponent(currentUrl)}`);
+        const response = await fetch(`/api/fetch-image?action=getSiteImages&url=${encodeURIComponent(currentUrl)}&index=${nextIndex}`);
         const data = await response.json();
         imageCheckButton.disabled = false;
         statusDiv.textContent = `Showing URL ${currentIndex + 1} of ${urls.length}`;
 
         if (response.ok && data.image) {
-          checkedImages.push(data.image);
+          checkedImages.push({ url: currentUrl, image: data.image, index: nextIndex });
+          const displayIndex = checkedImages.length;
           const row = document.createElement('tr');
           row.innerHTML = `
+            <td>${displayIndex}</td>
             <td><img src="${data.image}" alt="Thumbnail"></td>
             <td><a href="${data.image}" target="_blank">${data.image}</a></td>
           `;
           imageTableBody.appendChild(row);
           errorDiv.style.display = 'none';
         } else {
-          errorDiv.textContent = data.error || 'No image found';
+          errorDiv.textContent = data.error || `No image found at index ${nextIndex + 1}`;
           errorDiv.style.display = 'block';
         }
       } catch (error) {
@@ -294,9 +306,13 @@
       }
     };
 
-    let urls = [];
-    let currentIndex = parseInt(localStorage.getItem('sitemapCurrentIndex')) || 0;
-    let checkedImages = []; // Store checked images for table
+    window.clearTable = function() {
+      const imageTableBody = document.getElementById('imageTableBody');
+      const errorDiv = document.getElementById('error-message');
+      imageTableBody.innerHTML = '';
+      checkedImages = [];
+      errorDiv.style.display = 'none';
+    };
 
     document.addEventListener('DOMContentLoaded', () => {
       const urlInput = document.getElementById('urlInput');
@@ -305,6 +321,7 @@
       const indexInput = document.getElementById('indexInput');
       const visitButton = document.getElementById('visitButton');
       const imageCheckButton = document.getElementById('imageCheckButton');
+      const clearButton = document.getElementById('clearButton');
       const imageTableBody = document.getElementById('imageTableBody');
       const statusDiv = document.getElementById('status');
       const errorDiv = document.getElementById('error-message');
@@ -330,6 +347,7 @@
         indexInput.disabled = true;
         visitButton.disabled = true;
         imageCheckButton.disabled = true;
+        clearButton.disabled = true;
 
         try {
           const response = await fetch('/api/fetch-image?action=getSitemapUrls');
@@ -346,6 +364,7 @@
             indexInput.max = urls.length;
             visitButton.disabled = false;
             imageCheckButton.disabled = false;
+            clearButton.disabled = checkedImages.length === 0;
             localStorage.setItem('sitemapCurrentIndex', currentIndex);
             updateInputWidth();
           } else {
@@ -375,6 +394,7 @@
         nextButton.disabled = currentIndex === urls.length - 1;
         visitButton.disabled = !urls[currentIndex];
         imageCheckButton.disabled = !urls[currentIndex];
+        clearButton.disabled = checkedImages.length === 0;
         errorDiv.style.display = 'none';
         localStorage.setItem('sitemapCurrentIndex', currentIndex);
         updateInputWidth();
@@ -390,6 +410,7 @@
           nextButton.disabled = currentIndex === urls.length - 1;
           visitButton.disabled = !urls[currentIndex];
           imageCheckButton.disabled = !urls[currentIndex];
+          clearButton.disabled = checkedImages.length === 0;
           errorDiv.style.display = 'none';
           localStorage.setItem('sitemapCurrentIndex', currentIndex);
           updateInputWidth();
