@@ -295,7 +295,7 @@
           imageTableBody.appendChild(row);
           errorDiv.style.display = 'none';
         } else {
-          errorDiv.textContent = data.error || `No image found at index ${nextIndex + 1}`;
+          errorDiv.textContent = data.error || `No more images found for this URL`;
           errorDiv.style.display = 'block';
         }
       } catch (error) {
@@ -309,9 +309,15 @@
     window.clearTable = function() {
       const imageTableBody = document.getElementById('imageTableBody');
       const errorDiv = document.getElementById('error-message');
+      const imageCheckButton = document.getElementById('imageCheckButton');
+      const clearButton = document.getElementById('clearButton');
       imageTableBody.innerHTML = '';
       checkedImages = [];
       errorDiv.style.display = 'none';
+      clearButton.disabled = true;
+      if (urls[currentIndex]) {
+        imageCheckButton.disabled = false;
+      }
     };
 
     document.addEventListener('DOMContentLoaded', () => {
@@ -372,12 +378,14 @@
             errorDiv.style.display = 'block';
             statusDiv.textContent = '';
             urlInput.value = '';
+            clearButton.disabled = true;
           }
         } catch (error) {
           errorDiv.textContent = `Error: ${error.message}`;
           errorDiv.style.display = 'block';
           statusDiv.textContent = '';
           urlInput.value = '';
+          clearButton.disabled = true;
         }
       }
 
