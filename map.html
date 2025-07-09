@@ -193,24 +193,24 @@
 </head>
 <body>
   <div class="container">
-    <h1>Image Scraper by Tate - Sitemap Navigator</h1>
+    <h1>ImageScraper by Tate - Sitemap Navigator</h1>
     <div class="navigator">
-      <button id="prevButton" class="btn" onclick="navigate(-1)" disabled title="prev">
-        <span class="fas fa-arrow-left"></span>
+      <button id="prevButton" class="btn" onclick="navigate(-1)" disabled title="Previous URL">
+        <i class="fas fa-arrow-left"></i>
       </button>
       <input type="text" id="urlInput" readonly placeholder="Loading URLs...">
       <button id="nextButton" class="btn" onclick="navigate(1)" disabled title="Next URL">
-        <span class="fas fa-arrow-right"></span>
+        <i class="fas fa-arrow-right"></i>
       </button>
     </div>
     <div id="status">Loading...</div>
     <div class="index-container">
       <label for="indexInput">Go to URL #:</label>
       <input type="number" id="indexInput" min="1" placeholder="1">
-      <button id="visitButton" class="btn" onclick="visitUrl()" disabled title="Visit Page">
-        <span class="fas fa-globe"></span>
+      <button id="visitButton" class="btn" onclick="visitUrl()" disabled title="Visit URL">
+        <i class="fas fa-globe"></i>
       </button>
-      <button id="imageCheckButton" class="btn" onclick="checkImage()" disabled title="Check for Image">Check Image</button>
+      <button id="imageCheckButton" class="btn" onclick="checkImage()" disabled title="Check for Image">Image Check</button>
     </div>
     <table id="imageTable">
       <thead>
@@ -229,8 +229,8 @@
     const backgrounds = [
       { name: "Default", url: "" },
       { name: "Alternative 1", url: "/images/background_alt1.jpg" },
-      { name: "Alternative 2", url: "/images/background_image2.jpg" },
-      { name: "Alternative 3", url: "/images/background_alt3.jpg" }
+      { name: "Alternative 2", url: "/images/background_alt2.jpg" },
+      { name: "Alternative 3", url: "/images/background_e8.jpg" } // Fixed typo
     ];
 
     let currentBackgroundIndex = parseInt(localStorage.getItem('currentBackgroundIndex')) || 0;
@@ -249,6 +249,55 @@
       }
     }
 
+    window.checkImage = async function() {
+      const urlInput = document.getElementById('urlInput');
+      const imageCheckButton = document.getElementById('imageCheckButton');
+      const imageTableBody = document.getElementById('imageTableBody');
+      const statusDiv = document.getElementById('status');
+      const errorDiv = document.getElementById('error-message');
+      const currentUrl = urlInput.value;
+
+      if (!currentUrl) {
+        errorDiv.textContent = 'No URL to check';
+        errorDiv.style.display = 'block';
+        return;
+      }
+
+      errorDiv.style.display = 'none';
+      imageCheckButton.disabled = true;
+      statusDiv.textContent = `Checking for images on ${currentUrl}...`;
+
+      try {
+        const response = await fetch(`/api/fetch-image?action=getSiteImages&url=${encodeURIComponent(currentUrl)}`);
+        const data = await response.json();
+        imageCheckButton.disabled = false;
+        statusDiv.textContent = `Showing URL ${currentIndex + 1} of ${urls.length}`;
+
+        if (response.ok && data.image) {
+          checkedImages.push(data.image);
+          const row = document.createElement('tr');
+          row.innerHTML = `
+            <td><img src="${data.image}" alt="Thumbnail"></td>
+            <td><a href="${data.image}" target="_blank">${data.image}</a></td>
+          `;
+          imageTableBody.appendChild(row);
+          errorDiv.style.display = 'none';
+        } else {
+          errorDiv.textContent = data.error || 'No image found';
+          errorDiv.style.display = 'block';
+        }
+      } catch (error) {
+        imageCheckButton.disabled = false;
+        statusDiv.textContent = `Showing URL ${currentIndex + 1} of ${urls.length}`;
+        errorDiv.textContent = `Error checking image: ${error.message}`;
+        errorDiv.style.display = 'block';
+      }
+    };
+
+    let urls = [];
+    let currentIndex = parseInt(localStorage.getItem('sitemapCurrentIndex')) || 0;
+    let checkedImages = []; // Store checked images for table
+
     document.addEventListener('DOMContentLoaded', () => {
       const urlInput = document.getElementById('urlInput');
       const prevButton = document.getElementById('prevButton');
@@ -265,53 +314,10 @@
       textMeasure.id = 'textMeasure';
       document.body.appendChild(textMeasure);
 
-      let urls = [];
-      let currentIndex = parseInt(localStorage.getItem('sitemapCurrentIndex')) || 0;
-      let checkedImages = []; // Store checked images for table
-
       function updateInputWidth() {
         textMeasure.textContent = urlInput.value || urlInput.placeholder;
         const width = textMeasure.offsetWidth;
         urlInput.style.width = `${Math.min(Math.max(width, 200), 600)}px`;
-      }
-
-      async function checkImage() {
-        const currentUrl = urlInput.value;
-        if (!currentUrl) {
-          errorDiv.textContent = 'No URL to check';
-          errorDiv.style.display = 'block';
-          return;
-        }
-
-        errorDiv.style.display = 'none';
-        imageCheckButton.disabled = true;
-        statusDiv.textContent = `Checking for images on ${currentUrl}...`;
-
-        try {
-          const response = await fetch(`/api/fetch-image?action=getSiteImages&url=${encodeURIComponent(currentUrl)}`);
-          const data = await response.json();
-          imageCheckButton.disabled = false;
-          statusDiv.textContent = `Showing URL ${currentIndex + 1} of ${urls.length}`;
-
-          if (response.ok && data.image) {
-            checkedImages.push(data.image);
-            const row = document.createElement('tr');
-            row.innerHTML = `
-              <td><img src="${data.image}" alt="Thumbnail"></td>
-              <td><a href="${data.image}" target="_blank">${data.image}</a></td>
-            `;
-            imageTableBody.appendChild(row);
-            errorDiv.style.display = 'none';
-          } else {
-            errorDiv.textContent = data.error || 'No image found';
-            errorDiv.style.display = 'block';
-          }
-        } catch (error) {
-          imageCheckButton.disabled = false;
-          statusDiv.textContent = `Showing URL ${currentIndex + 1} of ${urls.length}`;
-          errorDiv.textContent = `Error checking image: ${error.message}`;
-          errorDiv.style.display = 'block';
-        }
       }
 
       async function loadSitemapUrls() {
@@ -344,13 +350,13 @@
             updateInputWidth();
           } else {
             errorDiv.textContent = data.error || 'No URLs found in sitemap';
-            errorDiv.style.display = 'none';
+            errorDiv.style.display = 'block';
             statusDiv.textContent = '';
             urlInput.value = '';
           }
         } catch (error) {
           errorDiv.textContent = `Error: ${error.message}`;
-          errorDiv.style.display = 'none';
+          errorDiv.style.display = 'block';
           statusDiv.textContent = '';
           urlInput.value = '';
         }
