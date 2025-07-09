@@ -258,6 +258,7 @@
     window.checkImage = async function() {
       const urlInput = document.getElementById('urlInput');
       const imageCheckButton = document.getElementById('imageCheckButton');
+      const clearButton = document.getElementById('clearButton');
       const imageTableBody = document.getElementById('imageTableBody');
       const statusDiv = document.getElementById('status');
       const errorDiv = document.getElementById('error-message');
@@ -294,6 +295,7 @@
           `;
           imageTableBody.appendChild(row);
           errorDiv.style.display = 'none';
+          clearButton.disabled = false; // Enable Clear button after adding image
         } else {
           errorDiv.textContent = data.error || `No more images found for this URL`;
           errorDiv.style.display = 'block';
