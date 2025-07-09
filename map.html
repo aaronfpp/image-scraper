@@ -74,12 +74,17 @@
     }
     .btn {
       font-size: 14pt;
-      padding: 8px 15px;
+      padding: 8px;
       cursor: pointer;
       background-color: #007bff;
       color: white;
       border: none;
       border-radius: 5px;
+      min-width: 40px;
+      height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
     .btn:hover {
       background-color: #0056b3;
@@ -137,20 +142,34 @@
       font-family: Arial, sans-serif;
       padding: 8px;
     }
+    .index-container {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      justify-content: center;
+      margin-top: 10px;
+    }
   </style>
 </head>
 <body>
   <div class="container">
     <h1>ImageScraper by Tate - Sitemap Navigator</h1>
     <div class="navigator">
-      <button id="prevButton" class="btn" onclick="navigate(-1)" disabled>← Prev</button>
+      <button id="prevButton" class="btn" onclick="navigate(-1)" disabled title="Previous URL">
+        <i class="fas fa-arrow-left"></i>
+      </button>
       <input type="text" id="urlInput" readonly placeholder="Loading URLs...">
-      <button id="nextButton" class="btn" onclick="navigate(1)" disabled>Next →</button>
+      <button id="nextButton" class="btn" onclick="navigate(1)" disabled title="Next URL">
+        <i class="fas fa-arrow-right"></i>
+      </button>
     </div>
     <div id="status">Loading...</div>
-    <div>
+    <div class="index-container">
       <label for="indexInput">Go to URL #:</label>
       <input type="number" id="indexInput" min="1" placeholder="1">
+      <button id="visitButton" class="btn" onclick="visitUrl()" disabled title="Visit URL">
+        <i class="fas fa-globe"></i>
+      </button>
     </div>
     <div id="error-message"></div>
   </div>
@@ -173,11 +192,19 @@
       document.documentElement.style.setProperty('--background-image', bgUrl);
     }
 
+    function visitUrl() {
+      const url = document.getElementById('urlInput').value;
+      if (url) {
+        window.open(url, '_blank');
+      }
+    }
+
     document.addEventListener('DOMContentLoaded', () => {
       const urlInput = document.getElementById('urlInput');
       const prevButton = document.getElementById('prevButton');
       const nextButton = document.getElementById('nextButton');
       const indexInput = document.getElementById('indexInput');
+      const visitButton = document.getElementById('visitButton');
       const statusDiv = document.getElementById('status');
       const errorDiv = document.getElementById('error-message');
 
@@ -203,6 +230,7 @@
         nextButton.disabled = true;
         indexInput.value = '';
         indexInput.disabled = true;
+        visitButton.disabled = true;
 
         try {
           const response = await fetch('/api/fetch-image?action=getSitemapUrls');
@@ -217,6 +245,7 @@
             nextButton.disabled = currentIndex === urls.length - 1;
             indexInput.disabled = false;
             indexInput.max = urls.length;
+            visitButton.disabled = false;
             localStorage.setItem('sitemapCurrentIndex', currentIndex);
             updateInputWidth();
           } else {
@@ -244,6 +273,7 @@
         statusDiv.textContent = `Showing URL ${currentIndex + 1} of ${urls.length}`;
         prevButton.disabled = currentIndex === 0;
         nextButton.disabled = currentIndex === urls.length - 1;
+        visitButton.disabled = !urls[currentIndex];
         errorDiv.style.display = 'none';
         localStorage.setItem('sitemapCurrentIndex', currentIndex);
         updateInputWidth();
@@ -257,6 +287,7 @@
           statusDiv.textContent = `Showing URL ${currentIndex + 1} of ${urls.length}`;
           prevButton.disabled = currentIndex === 0;
           nextButton.disabled = currentIndex === urls.length - 1;
+          visitButton.disabled = !urls[currentIndex];
           errorDiv.style.display = 'none';
           localStorage.setItem('sitemapCurrentIndex', currentIndex);
           updateInputWidth();
