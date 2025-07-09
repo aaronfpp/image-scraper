@@ -2,7 +2,7 @@ const fetch = require('node-fetch');
 const cheerio = require('cheerio');
 
 exports.handler = async function(event) {
-  const { sku, size, type, action } = event.queryStringParameters || {};
+  const { sku, size, type, action, url } = event.queryStringParameters || {};
   console.log(`Received query parameters: ${JSON.stringify(event.queryStringParameters)}`);
 
   // Handle title scraping request
@@ -27,8 +27,8 @@ exports.handler = async function(event) {
 
   // Handle site images scraping request
   if (action === 'getSiteImages') {
-    console.log(`Processing site images scrape`);
-    const result = await scrapeSiteImages();
+    console.log(`Processing site images scrape for URL: ${url}`);
+    const result = await scrapeSiteImages(url);
     return {
       statusCode: result.statusCode,
       headers: { 'Content-Type': 'application/json' },
@@ -58,10 +58,10 @@ exports.handler = async function(event) {
     };
   }
 
-  const url = `https://images.ifsta.org/products/${sku}/${size}${type}`;
-  console.log(`Fetching URL: ${url}`);
+  const imageUrl = `https://images.ifsta.org/products/${sku}/${size}${type}`;
+  console.log(`Fetching URL: ${imageUrl}`);
   try {
-    const response = await fetch(url, {
+    const response = await fetch(imageUrl, {
       method: 'GET',
       headers: { 'User-Agent': 'Mozilla/5.0 (compatible; ImageScraper/1.0)' }
     });
@@ -85,7 +85,7 @@ exports.handler = async function(event) {
       })
     };
   } catch (error) {
-    console.error(`Error fetching ${url}: ${error.message}`);
+    console.error(`Error fetching ${imageUrl}: ${error.message}`);
     return {
       statusCode: error.message.includes('Status 404') ? 404 : 500,
       headers: { 'Content-Type': 'application/json' },
@@ -167,25 +167,32 @@ async function scrapeIFSTAPage(sku) {
   }
 }
 
-async function scrapeSiteImages() {
+async function scrapeSiteImages(pageUrl) {
   try {
-    const shopUrl = 'https://www.ifsta.org/shop';
-    console.log(`Fetching shop page: ${shopUrl}`);
-    const response = await fetch(shopUrl, {
+    if (!pageUrl || !pageUrl.startsWith('https://www.ifsta.org/')) {
+      console.error(`Invalid or missing URL: ${pageUrl}`);
+      return {
+        statusCode: 400,
+        body: { error: 'Invalid or missing URL' }
+      };
+    }
+
+    console.log(`Fetching page: ${pageUrl}`);
+    const response = await fetch(pageUrl, {
       method: 'GET',
       headers: { 'User-Agent': 'Mozilla/5.0 (compatible; ImageScraper/1.0)' }
     });
 
-    console.log(`Shop page status: ${response.status}`);
+    console.log(`Page status: ${response.status}`);
     if (!response.ok) {
       return {
         statusCode: response.status === 404 ? 404 : 500,
-        body: { error: `Failed to fetch shop page: Status ${response.status}` }
+        body: { error: `Failed to fetch page: Status ${response.status}` }
       };
     }
 
     const html = await response.text();
-    console.log(`Fetched HTML length for shop page: ${html.length} characters`);
+    console.log(`Fetched HTML length for page: ${html.length} characters`);
     const $ = cheerio.load(html);
 
     // Extract image URLs
@@ -198,8 +205,7 @@ async function scrapeSiteImages() {
       }
     });
 
-    // Validate image URLs
-    const validImageUrls = [];
+    // Validate image URLs and return the first valid one
     for (const url of imageUrls) {
       try {
         const headResponse = await fetch(url, {
@@ -207,8 +213,11 @@ async function scrapeSiteImages() {
           headers: { 'User-Agent': 'Mozilla/5.0 (compatible; ImageScraper/1.0)' }
         });
         if (headResponse.ok && headResponse.headers.get('content-type').startsWith('image/')) {
-          validImageUrls.push(url);
           console.log(`Valid image found: ${url}`);
+          return {
+            statusCode: 200,
+            body: { image: url }
+          };
         } else {
           console.log(`Invalid image URL: ${url}, status: ${headResponse.status}`);
         }
@@ -217,23 +226,16 @@ async function scrapeSiteImages() {
       }
     }
 
-    if (validImageUrls.length === 0) {
-      console.log('No valid images found on shop page');
-      return {
-        statusCode: 404,
-        body: { error: 'No valid images found' }
-      };
-    }
-
+    console.log('No valid images found on page');
     return {
-      statusCode: 200,
-      body: { images: validImageUrls }
+      statusCode: 404,
+      body: { error: 'No valid images found' }
     };
   } catch (error) {
-    console.error(`Error scraping site images: ${error.message}`);
+    console.error(`Error scraping images for ${pageUrl}: ${error.message}`);
     return {
       statusCode: 500,
-      body: { error: `Error scraping site images: ${error.message}` }
+      body: { error: `Error scraping images: ${error.message}` }
     };
   }
 }
