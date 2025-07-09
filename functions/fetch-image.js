@@ -199,7 +199,7 @@ async function scrapeSiteImages(pageUrl, index) {
     const imageUrls = [];
     $('img').each((i, elem) => {
       const src = $(elem).attr('src');
-      if (src && src.match(/\/sites\/(default\/files\/(styles\/medium\/public\/)?|all\/themes\/drupal_shop_theme\/images\/).*\.(jpg|png)(\?.*)?$/i)) {
+      if (src && src.match(/\/sites\/(default\/files\/((styles\/medium\/public\/|awards\/))?|all\/themes\/drupal_shop_theme\/images\/).*\.(jpg|png)(\?.*)?$/i)) {
         const fullUrl = src.startsWith('http') ? src : `https://www.ifsta.org${src}`;
         imageUrls.push(fullUrl);
         console.log(`Found image ${i}: ${fullUrl}`);
