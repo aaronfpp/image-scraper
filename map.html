@@ -58,12 +58,14 @@
       margin: 20px 0;
     }
     #urlInput {
-      flex: 1;
       padding: 8px;
       font-size: 16px;
       border: 1px solid #ccc;
       border-radius: 5px;
       background-color: #f9f9f9;
+      width: auto;
+      min-width: 200px;
+      max-width: 600px;
     }
     .dark-theme #urlInput {
       background-color: #555555;
@@ -96,16 +98,18 @@
     .dark-theme .btn:disabled {
       color: #999999;
     }
-    #theme-btn {
-      margin-bottom: 10px;
+    #indexInput {
+      width: 60px;
+      padding: 8px;
+      font-size: 16px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      text-align: center;
     }
-    #theme-label {
-      font-size: 14pt;
-      margin-bottom: 10px;
-      display: inline-block;
-    }
-    .dark-theme #theme-label {
+    .dark-theme #indexInput {
+      background-color: #555555;
       color: #ffffff;
+      border-color: #777777;
     }
     #error-message {
       color: red;
@@ -125,37 +129,34 @@
     .dark-theme #status {
       color: #ffffff;
     }
+    #textMeasure {
+      position: absolute;
+      visibility: hidden;
+      white-space: nowrap;
+      font-size: 16px;
+      font-family: Arial, sans-serif;
+      padding: 8px;
+    }
   </style>
 </head>
 <body>
   <div class="container">
     <h1>ImageScraper by Tate - Sitemap Navigator</h1>
-    <button id="theme-btn" class="btn" onclick="toggleTheme()" aria-label="Switch to Alternative 1 background">
-      <i class="fas fa-adjust"></i> Toggle Theme
-    </button>
-    <span id="theme-label">Theme: Default</span>
     <div class="navigator">
       <button id="prevButton" class="btn" onclick="navigate(-1)" disabled>← Prev</button>
       <input type="text" id="urlInput" readonly placeholder="Loading URLs...">
       <button id="nextButton" class="btn" onclick="navigate(1)" disabled>Next →</button>
     </div>
-    <div id="status"></div>
+    <div id="status">Loading...</div>
+    <div>
+      <label for="indexInput">Go to URL #:</label>
+      <input type="number" id="indexInput" min="1" placeholder="1">
+    </div>
     <div id="error-message"></div>
   </div>
   <footer id="footer" aria-label="IFSTA Copyright 2025">IFSTA © 2025 https://github.com/aaronfpp/image-scraper</footer>
 
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
-  <script type="text/javascript">
-    const section = {
-      baseURL: "https://images.ifsta.org/products/",
-      sizes: ["default", "thumb", "69", "100", "130", "150", "180", "200", "200x200", "420"],
-      fileTypes: [".png", ".webp"],
-      inputLabel: "SKU",
-      validationRegex: /^[0-9]{5}$/,
-      fetchTimeout: 10000
-    };
-
+  <script>
     const backgrounds = [
       { name: "Default", url: "" },
       { name: "Alternative 1", url: "/images/background_alt1.jpg" },
@@ -164,33 +165,35 @@
     ];
 
     let currentBackgroundIndex = parseInt(localStorage.getItem('currentBackgroundIndex')) || 0;
-    const themeBtn = document.getElementById("theme-btn");
-    const themeLabel = document.getElementById("theme-label");
-
-    function toggleTheme() {
-      currentBackgroundIndex = (currentBackgroundIndex + 1) % backgrounds.length;
-      localStorage.setItem("currentBackgroundIndex", currentBackgroundIndex);
-      updateTheme();
-    }
 
     function updateTheme() {
       const isDarkTheme = currentBackgroundIndex !== 0;
       document.body.classList.toggle("dark-theme", isDarkTheme);
       const bgUrl = backgrounds[currentBackgroundIndex].url ? `url('${backgrounds[currentBackgroundIndex].url}')` : 'none';
       document.documentElement.style.setProperty('--background-image', bgUrl);
-      themeBtn.setAttribute("aria-label", `Switch to ${backgrounds[(currentBackgroundIndex + 1) % backgrounds.length].name} background`);
-      themeLabel.textContent = `Theme: ${backgrounds[currentBackgroundIndex].name}`;
     }
 
     document.addEventListener('DOMContentLoaded', () => {
       const urlInput = document.getElementById('urlInput');
       const prevButton = document.getElementById('prevButton');
       const nextButton = document.getElementById('nextButton');
+      const indexInput = document.getElementById('indexInput');
       const statusDiv = document.getElementById('status');
       const errorDiv = document.getElementById('error-message');
 
+      // Create hidden span for measuring text width
+      const textMeasure = document.createElement('span');
+      textMeasure.id = 'textMeasure';
+      document.body.appendChild(textMeasure);
+
       let urls = [];
       let currentIndex = parseInt(localStorage.getItem('sitemapCurrentIndex')) || 0;
+
+      function updateInputWidth() {
+        textMeasure.textContent = urlInput.value || urlInput.placeholder;
+        const width = textMeasure.offsetWidth;
+        urlInput.style.width = `${Math.min(Math.max(width, 200), 600)}px`;
+      }
 
       async function loadSitemapUrls() {
         errorDiv.style.display = 'none';
@@ -198,6 +201,8 @@
         urlInput.value = '';
         prevButton.disabled = true;
         nextButton.disabled = true;
+        indexInput.value = '';
+        indexInput.disabled = true;
 
         try {
           const response = await fetch('/api/fetch-image?action=getSitemapUrls');
@@ -206,10 +211,14 @@
             urls = data.urls;
             currentIndex = Math.min(Math.max(currentIndex, 0), urls.length - 1);
             urlInput.value = urls[currentIndex] || '';
+            indexInput.value = currentIndex + 1;
             statusDiv.textContent = `Showing URL ${currentIndex + 1} of ${urls.length}`;
             prevButton.disabled = currentIndex === 0;
             nextButton.disabled = currentIndex === urls.length - 1;
+            indexInput.disabled = false;
+            indexInput.max = urls.length;
             localStorage.setItem('sitemapCurrentIndex', currentIndex);
+            updateInputWidth();
           } else {
             errorDiv.textContent = data.error || 'No URLs found in sitemap';
             errorDiv.style.display = 'block';
@@ -231,12 +240,32 @@
           currentIndex++;
         }
         urlInput.value = urls[currentIndex] || '';
+        indexInput.value = currentIndex + 1;
         statusDiv.textContent = `Showing URL ${currentIndex + 1} of ${urls.length}`;
         prevButton.disabled = currentIndex === 0;
         nextButton.disabled = currentIndex === urls.length - 1;
         errorDiv.style.display = 'none';
         localStorage.setItem('sitemapCurrentIndex', currentIndex);
+        updateInputWidth();
       };
+
+      indexInput.addEventListener('change', () => {
+        const value = parseInt(indexInput.value);
+        if (value >= 1 && value <= urls.length) {
+          currentIndex = value - 1;
+          urlInput.value = urls[currentIndex] || '';
+          statusDiv.textContent = `Showing URL ${currentIndex + 1} of ${urls.length}`;
+          prevButton.disabled = currentIndex === 0;
+          nextButton.disabled = currentIndex === urls.length - 1;
+          errorDiv.style.display = 'none';
+          localStorage.setItem('sitemapCurrentIndex', currentIndex);
+          updateInputWidth();
+        } else {
+          errorDiv.textContent = `Please enter a number between 1 and ${urls.length}`;
+          errorDiv.style.display = 'block';
+          indexInput.value = currentIndex + 1;
+        }
+      });
 
       // Apply theme and load URLs on page load
       updateTheme();
