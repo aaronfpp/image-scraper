@@ -103,7 +103,7 @@
     .dark-theme .btn:disabled {
       color: #999999;
     }
-    #imageCheckButton, #clearButton {
+    #imageCheckButton, #clearButton, #validateButton {
       min-width: auto;
       padding: 8px 15px;
       font-size: 12pt;
@@ -198,7 +198,7 @@
       <button id="prevButton" class="btn" onclick="navigate(-1)" disabled title="Previous URL">
         <i class="fas fa-arrow-left"></i>
       </button>
-      <input type="text" id="urlInput" readonly placeholder="Loading URLs...">
+      <input type="text" id="urlInput" placeholder="Enter or select a URL...">
       <button id="nextButton" class="btn" onclick="navigate(1)" disabled title="Next URL">
         <i class="fas fa-arrow-right"></i>
       </button>
@@ -210,6 +210,7 @@
       <button id="visitButton" class="btn" onclick="visitUrl()" disabled title="Visit URL">
         <i class="fas fa-globe"></i>
       </button>
+      <button id="validateButton" class="btn" onclick="validateUrl()" disabled title="Validate URL">Validate</button>
       <button id="imageCheckButton" class="btn" onclick="checkImage()" disabled title="Check for Image">Image Check</button>
       <button id="clearButton" class="btn" onclick="clearTable()" title="Clear Table">Clear</button>
     </div>
@@ -254,6 +255,46 @@
     let urls = [];
     let currentIndex = parseInt(localStorage.getItem('sitemapCurrentIndex')) || 0;
     let checkedImages = []; // { url: string, image: string, index: number }
+    let isManualInput = false;
+
+    function isValidUrl(url) {
+      return url && url.startsWith('https://www.ifsta.org/');
+    }
+
+    window.validateUrl = async function() {
+      const urlInput = document.getElementById('urlInput');
+      const errorDiv = document.getElementById('error-message');
+      const statusDiv = document.getElementById('status');
+      const currentUrl = urlInput.value.trim();
+
+      if (!isValidUrl(currentUrl)) {
+        errorDiv.textContent = 'URL must start with https://www.ifsta.org/';
+        errorDiv.style.display = 'block';
+        return;
+      }
+
+      errorDiv.style.display = 'none';
+      statusDiv.textContent = 'Validating URL...';
+
+      try {
+        if (urls.includes(currentUrl)) {
+          const index = urls.indexOf(currentUrl);
+          currentIndex = index;
+          isManualInput = false;
+          indexInput.value = index + 1;
+          statusDiv.textContent = `Showing URL ${currentIndex + 1} of ${urls.length} (in sitemap)`;
+          localStorage.setItem('sitemapCurrentIndex', currentIndex);
+        } else {
+          statusDiv.textContent = `Showing URL ${currentIndex + 1} of ${urls.length} (not in sitemap)`;
+          errorDiv.textContent = 'URL is valid but not in sitemap';
+          errorDiv.style.display = 'block';
+        }
+      } catch (error) {
+        errorDiv.textContent = `Error validating URL: ${error.message}`;
+        errorDiv.style.display = 'block';
+        statusDiv.textContent = `Showing URL ${currentIndex + 1} of ${urls.length}`;
+      }
+    };
 
     window.checkImage = async function() {
       const urlInput = document.getElementById('urlInput');
@@ -262,10 +303,10 @@
       const imageTableBody = document.getElementById('imageTableBody');
       const statusDiv = document.getElementById('status');
       const errorDiv = document.getElementById('error-message');
-      const currentUrl = urlInput.value;
+      const currentUrl = urlInput.value.trim();
 
-      if (!currentUrl) {
-        errorDiv.textContent = 'No URL to check';
+      if (!isValidUrl(currentUrl)) {
+        errorDiv.textContent = 'URL must start with https://www.ifsta.org/';
         errorDiv.style.display = 'block';
         return;
       }
@@ -282,7 +323,7 @@
         const response = await fetch(`/api/fetch-image?action=getSiteImages&url=${encodeURIComponent(currentUrl)}&index=${nextIndex}`);
         const data = await response.json();
         imageCheckButton.disabled = false;
-        statusDiv.textContent = `Showing URL ${currentIndex + 1} of ${urls.length}`;
+        statusDiv.textContent = isManualInput ? 'Showing manual URL' : `Showing URL ${currentIndex + 1} of ${urls.length}`;
 
         if (response.ok && data.image) {
           checkedImages.push({ url: currentUrl, image: data.image, index: nextIndex });
@@ -295,14 +336,14 @@
           `;
           imageTableBody.appendChild(row);
           errorDiv.style.display = 'none';
-          clearButton.disabled = false; // Enable Clear button after adding image
+          clearButton.disabled = false;
         } else {
           errorDiv.textContent = data.error || `No more images found for this URL`;
           errorDiv.style.display = 'block';
         }
       } catch (error) {
         imageCheckButton.disabled = false;
-        statusDiv.textContent = `Showing URL ${currentIndex + 1} of ${urls.length}`;
+        statusDiv.textContent = isManualInput ? 'Showing manual URL' : `Showing URL ${currentIndex + 1} of ${urls.length}`;
         errorDiv.textContent = `Error checking image: ${error.message}`;
         errorDiv.style.display = 'block';
       }
@@ -317,7 +358,7 @@
       checkedImages = [];
       errorDiv.style.display = 'none';
       clearButton.disabled = true;
-      if (urls[currentIndex]) {
+      if (isValidUrl(urlInput.value)) {
         imageCheckButton.disabled = false;
       }
     };
@@ -328,6 +369,7 @@
       const nextButton = document.getElementById('nextButton');
       const indexInput = document.getElementById('indexInput');
       const visitButton = document.getElementById('visitButton');
+      const validateButton = document.getElementById('validateButton');
       const imageCheckButton = document.getElementById('imageCheckButton');
       const clearButton = document.getElementById('clearButton');
       const imageTableBody = document.getElementById('imageTableBody');
@@ -345,6 +387,17 @@
         urlInput.style.width = `${Math.min(Math.max(width, 200), 600)}px`;
       }
 
+      urlInput.addEventListener('input', () => {
+        isManualInput = true;
+        updateInputWidth();
+        const isValid = isValidUrl(urlInput.value.trim());
+        imageCheckButton.disabled = !isValid;
+        visitButton.disabled = !isValid;
+        validateButton.disabled = !isValid;
+        errorDiv.style.display = 'none';
+        statusDiv.textContent = isValid ? 'Showing manual URL' : 'Enter a valid URL';
+      });
+
       async function loadSitemapUrls() {
         errorDiv.style.display = 'none';
         statusDiv.textContent = 'Loading sitemap URLs...';
@@ -354,6 +407,7 @@
         indexInput.value = '';
         indexInput.disabled = true;
         visitButton.disabled = true;
+        validateButton.disabled = true;
         imageCheckButton.disabled = true;
         clearButton.disabled = true;
 
@@ -371,8 +425,10 @@
             indexInput.disabled = false;
             indexInput.max = urls.length;
             visitButton.disabled = false;
+            validateButton.disabled = false;
             imageCheckButton.disabled = false;
             clearButton.disabled = checkedImages.length === 0;
+            isManualInput = false;
             localStorage.setItem('sitemapCurrentIndex', currentIndex);
             updateInputWidth();
           } else {
@@ -381,6 +437,7 @@
             statusDiv.textContent = '';
             urlInput.value = '';
             clearButton.disabled = true;
+            validateButton.disabled = true;
           }
         } catch (error) {
           errorDiv.textContent = `Error: ${error.message}`;
@@ -388,6 +445,7 @@
           statusDiv.textContent = '';
           urlInput.value = '';
           clearButton.disabled = true;
+          validateButton.disabled = true;
         }
       }
 
@@ -403,9 +461,11 @@
         prevButton.disabled = currentIndex === 0;
         nextButton.disabled = currentIndex === urls.length - 1;
         visitButton.disabled = !urls[currentIndex];
+        validateButton.disabled = !urls[currentIndex];
         imageCheckButton.disabled = !urls[currentIndex];
         clearButton.disabled = checkedImages.length === 0;
         errorDiv.style.display = 'none';
+        isManualInput = false;
         localStorage.setItem('sitemapCurrentIndex', currentIndex);
         updateInputWidth();
       };
@@ -419,9 +479,11 @@
           prevButton.disabled = currentIndex === 0;
           nextButton.disabled = currentIndex === urls.length - 1;
           visitButton.disabled = !urls[currentIndex];
+          validateButton.disabled = !urls[currentIndex];
           imageCheckButton.disabled = !urls[currentIndex];
           clearButton.disabled = checkedImages.length === 0;
           errorDiv.style.display = 'none';
+          isManualInput = false;
           localStorage.setItem('sitemapCurrentIndex', currentIndex);
           updateInputWidth();
         } else {
