@@ -325,6 +325,26 @@
      #product-title p {
      margin: 5px 0;
      }
+
+        #map-btn {
+    position: absolute;
+    top: 10px;
+    right: 170px;
+    background-color: #333333;
+    font-size: 12pt;
+    padding: 8px;
+    display: block;
+  }
+  #map-btn:hover {
+    background-color: #555555;
+  }
+  .dark-theme #map-btn {
+    background-color: #b32318;
+  }
+  .dark-theme #map-btn:hover {
+    background-color: #8e1c13;
+  }
+      
     </style>
   </head>
   <body>
@@ -358,6 +378,7 @@
         <button id="submit-btn" class="btn" aria-label="Submit SKU">Go</button>
         <button id="clear-btn" class="btn" aria-label="Clear input and images">Clear</button>
         <button id="cancel-btn" class="btn" aria-label="Cancel ongoing scan">Cancel</button>
+        <button id="map-btn" class="btn" aria-label="Open Map Scraper" style="position: absolute; top: 10px; right: 170px;"><i class="fas fa-map"></i></button>
       </div>
       <div id="error-message" aria-live="polite"></div>
       <div id="product-title" class="product-title" aria-live="polite"></div>
@@ -391,6 +412,10 @@
       const downloadBtn = document.getElementById("download-btn");
       const searchBtn = document.getElementById("search-btn");
       const batchSaveBtn = document.getElementById("batch-save-btn");
+        const mapBtn = document.getElementById("map-btn");
+  mapBtn.addEventListener("click", () => {
+    window.location.href = "map.html";
+  });
       const batchModal = document.getElementById("batch-modal");
       const batchModalOverlay = document.getElementById("batch-modal-overlay");
       const batchSKUInput = document.getElementById("batch-sku-input");
