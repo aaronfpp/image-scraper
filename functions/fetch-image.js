@@ -199,9 +199,10 @@ async function scrapeSiteImages(pageUrl, index) {
     const imageUrls = [];
     $('img').each((i, elem) => {
       const src = $(elem).attr('src');
-      if (src && src.match(/\/sites\/default\/files\/.*\.jpg$/i)) {
+      if (src && src.match(/\/sites\/default\/files\/.*\.(jpg|png)$/i)) {
         const fullUrl = src.startsWith('http') ? src : `https://www.ifsta.org${src}`;
         imageUrls.push(fullUrl);
+        console.log(`Found image ${i}: ${fullUrl}`);
       }
     });
 
