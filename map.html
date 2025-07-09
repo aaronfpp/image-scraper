@@ -1,0 +1,165 @@
+<script type="text/javascript">
+        var gk_isXlsx = false;
+        var gk_xlsxFileLookup = {};
+        var gk_fileData = {};
+        function filledCell(cell) {
+          return cell !== '' && cell != null;
+        }
+        function loadFileData(filename) {
+        if (gk_isXlsx && gk_xlsxFileLookup[filename]) {
+            try {
+                var workbook = XLSX.read(gk_fileData[filename], { type: 'base64' });
+                var firstSheetName = workbook.SheetNames[0];
+                var worksheet = workbook.Sheets[firstSheetName];
+
+                // Convert sheet to JSON to filter blank rows
+                var jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1, blankrows: false, defval: '' });
+                // Filter out blank rows (rows where all cells are empty, null, or undefined)
+                var filteredData = jsonData.filter(row => row.some(filledCell));
+
+                // Heuristic to find the header row by ignoring rows with fewer filled cells than the next row
+                var headerRowIndex = filteredData.findIndex((row, index) =>
+                  row.filter(filledCell).length >= filteredData[index + 1]?.filter(filledCell).length
+                );
+                // Fallback
+                if (headerRowIndex === -1 || headerRowIndex > 25) {
+                  headerRowIndex = 0;
+                }
+
+                // Convert filtered JSON back to CSV
+                var csv = XLSX.utils.aoa_to_sheet(filteredData.slice(headerRowIndex)); // Create a new sheet from filtered array of arrays
+                csv = XLSX.utils.sheet_to_csv(csv, { header: 1 });
+                return csv;
+            } catch (e) {
+                console.error(e);
+                return "";
+            }
+        }
+        return gk_fileData[filename] || "";
+        }
+        </script><!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>IFSTA Sitemap Navigator</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 20px;
+      max-width: 800px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+    h1 {
+      font-size: 24px;
+      margin-bottom: 20px;
+    }
+    .navigator {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+    #urlInput {
+      flex: 1;
+      padding: 8px;
+      font-size: 16px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      background-color: #f9f9f9;
+    }
+    button {
+      padding: 8px 12px;
+      font-size: 16px;
+      cursor: pointer;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      background-color: #f0f0f0;
+    }
+    button:hover {
+      background-color: #e0e0e0;
+    }
+    button:disabled {
+      cursor: not-allowed;
+      opacity: 0.5;
+    }
+    #error {
+      color: red;
+      margin-top: 10px;
+    }
+    #status {
+      margin-top: 10px;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+  <h1>IFSTA Sitemap Navigator</h1>
+  <div class="navigator">
+    <button id="prevButton" onclick="navigate(-1)" disabled>&larr; Prev</button>
+    <input type="text" id="urlInput" readonly placeholder="Loading URLs...">
+    <button id="nextButton" onclick="navigate(1)" disabled>Next &rarr;</button>
+  </div>
+  <div id="status"></div>
+  <div id="error"></div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const urlInput = document.getElementById('urlInput');
+      const prevButton = document.getElementById('prevButton');
+      const nextButton = document.getElementById('nextButton');
+      const statusDiv = document.getElementById('status');
+      const errorDiv = document.getElementById('error');
+
+      let urls = [];
+      let currentIndex = -1;
+
+      async function loadSitemapUrls() {
+        errorDiv.textContent = '';
+        statusDiv.textContent = 'Loading sitemap URLs...';
+        urlInput.value = '';
+        prevButton.disabled = true;
+        nextButton.disabled = true;
+
+        try {
+          const response = await fetch('/api/fetch-image?action=getSitemapUrls');
+          const data = await response.json();
+          if (response.ok && data.urls && data.urls.length > 0) {
+            urls = data.urls;
+            currentIndex = 0;
+            urlInput.value = urls[currentIndex];
+            statusDiv.textContent = `Showing URL 1 of ${urls.length}`;
+            prevButton.disabled = currentIndex === 0;
+            nextButton.disabled = currentIndex === urls.length - 1;
+          } else {
+            errorDiv.textContent = data.error || 'No URLs found in sitemap';
+            statusDiv.textContent = '';
+            urlInput.value = '';
+          }
+        } catch (error) {
+          errorDiv.textContent = `Error: ${error.message}`;
+          statusDiv.textContent = '';
+          urlInput.value = '';
+        }
+      }
+
+      window.navigate = (direction) => {
+        if (direction === -1 && currentIndex > 0) {
+          currentIndex--;
+        } else if (direction === 1 && currentIndex < urls.length - 1) {
+          currentIndex++;
+        }
+        urlInput.value = urls[currentIndex] || '';
+        statusDiv.textContent = `Showing URL ${currentIndex + 1} of ${urls.length}`;
+        prevButton.disabled = currentIndex === 0;
+        nextButton.disabled = currentIndex === urls.length - 1;
+        errorDiv.textContent = '';
+      };
+
+      // Load URLs on page load
+      loadSitemapUrls();
+    });
+  </script>
+</body>
+</html>
