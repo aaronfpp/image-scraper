@@ -89,23 +89,38 @@ async function scrapeIFSTAPage(sku) {
       };
     }
 
-const html = await response.text();
+    const html = await response.text();
     console.log(`Fetched HTML length for SKU ${sku}: ${html.length} characters`);
     const $ = cheerio.load(html);
+
+    // Check for error page indicators
+    const pageTitle = $('title').text().trim();
+    const pageHeader = $('h1').text().trim();
+    if (pageTitle.match(/404|page not found/i) || pageHeader.match(/page not found|error/i)) {
+      console.log(`Error page detected for SKU ${sku}: Title="${pageTitle}", Header="${pageHeader}"`);
+      return {
+        statusCode: 404,
+        body: { error: 'Product page not found' }
+      };
+    }
+
     const selectors = [
       '[id^="node-"] > div > div:nth-child(1) > div:nth-child(2) > h2',
       'h2.product-title',
       'h2'
     ];
 
-
+    // Filter titles to avoid invalid ones
     let title = null;
     for (const selector of selectors) {
       const element = $(selector).first();
       console.log(`Selector ${selector} tried for SKU ${sku}: ${element.text().trim() || 'Not found'}`);
       if (element.length) {
-        title = element.text().trim();
-        if (title) break;
+        const candidate = element.text().trim();
+        if (candidate.length > 5 && !candidate.match(/search form|page not found|error|menu|cart|login|search|home/i)) {
+          title = candidate;
+          break;
+        }
       }
     }
 
