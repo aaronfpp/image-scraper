@@ -1,108 +1,128 @@
-<script type="text/javascript">
-        var gk_isXlsx = false;
-        var gk_xlsxFileLookup = {};
-        var gk_fileData = {};
-        function filledCell(cell) {
-          return cell !== '' && cell != null;
-        }
-        function loadFileData(filename) {
-        if (gk_isXlsx && gk_xlsxFileLookup[filename]) {
-            try {
-                var workbook = XLSX.read(gk_fileData[filename], { type: 'base64' });
-                var firstSheetName = workbook.SheetNames[0];
-                var worksheet = workbook.Sheets[firstSheetName];
-
-                // Convert sheet to JSON to filter blank rows
-                var jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1, blankrows: false, defval: '' });
-                // Filter out blank rows (rows where all cells are empty, null, or undefined)
-                var filteredData = jsonData.filter(row => row.some(filledCell));
-
-                // Heuristic to find the header row by ignoring rows with fewer filled cells than the next row
-                var headerRowIndex = filteredData.findIndex((row, index) =>
-                  row.filter(filledCell).length >= filteredData[index + 1]?.filter(filledCell).length
-                );
-                // Fallback
-                if (headerRowIndex === -1 || headerRowIndex > 25) {
-                  headerRowIndex = 0;
-                }
-
-                // Convert filtered JSON back to CSV
-                var csv = XLSX.utils.aoa_to_sheet(filteredData.slice(headerRowIndex)); // Create a new sheet from filtered array of arrays
-                csv = XLSX.utils.sheet_to_csv(csv, { header: 1 });
-                return csv;
-            } catch (e) {
-                console.error(e);
-                return "";
-            }
-        }
-        return gk_fileData[filename] || "";
-        }
-        </script><!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>IFSTA Sitemap Navigator</title>
   <style>
-    body {
+    html, body {
       font-family: Arial, sans-serif;
-      margin: 20px;
+      margin: 0;
+      padding: 0;
+      text-align: center;
+      background-color: #e8e8e8;
+      color: #000000;
+      min-height: 100vh;
+    }
+    body {
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+    }
+    .container {
+      flex: 1 auto;
       max-width: 800px;
-      margin-left: auto;
-      margin-right: auto;
+      margin: 0 auto;
+      padding: 20px;
+    }
+    footer {
+      flex-shrink: 0;
+      font-size: 12pt;
+      text-align: center;
+      padding: 10px;
+      color: #333333;
+    }
+    .dark-theme footer {
+      color: #ffffff;
     }
     h1 {
+      margin-top: 0;
       font-size: 24px;
-      margin-bottom: 20px;
+    }
+    .dark-theme {
+      background: #333333 var(--background-image, none) no-repeat center center fixed;
+      background-size: cover;
+      color: #ffffff;
     }
     .navigator {
       display: flex;
       align-items: center;
       gap: 10px;
-      margin-bottom: 20px;
+      margin: 20px 0;
     }
     #urlInput {
       flex: 1;
       padding: 8px;
       font-size: 16px;
       border: 1px solid #ccc;
-      border-radius: 4px;
+      border-radius: 5px;
       background-color: #f9f9f9;
     }
-    button {
-      padding: 8px 12px;
-      font-size: 16px;
+    .dark-theme #urlInput {
+      background-color: #555555;
+      color: #ffffff;
+      border-color: #777777;
+    }
+    .btn {
+      font-size: 14pt;
+      padding: 8px 15px;
       cursor: pointer;
-      border: 1px solid #ccc;
-      border-radius: 4px;
-      background-color: #f0f0f0;
+      background-color: #007bff;
+      color: white;
+      border: none;
+      border-radius: 5px;
     }
-    button:hover {
-      background-color: #e0e0e0;
+    .btn:hover {
+      background-color: #0056b3;
     }
-    button:disabled {
+    .dark-theme .btn {
+      background-color: #b32318;
+    }
+    .dark-theme .btn:hover {
+      background-color: #8e1c13;
+    }
+    .btn:disabled {
+      background-color: #cccccc;
       cursor: not-allowed;
-      opacity: 0.5;
+      color: #666666;
     }
-    #error {
+    .dark-theme .btn:disabled {
+      color: #999999;
+    }
+    #error-message {
       color: red;
+      font-size: 14pt;
+      font-weight: bold;
       margin-top: 10px;
+      display: none;
+    }
+    .dark-theme #error-message {
+      color: #ff9999;
     }
     #status {
       margin-top: 10px;
+      font-size: 14pt;
       font-weight: bold;
+    }
+    .dark-theme #status {
+      color: #ffffff;
     }
   </style>
 </head>
 <body>
-  <h1>IFSTA Sitemap Navigator</h1>
-  <div class="navigator">
-    <button id="prevButton" onclick="navigate(-1)" disabled>&larr; Prev</button>
-    <input type="text" id="urlInput" readonly placeholder="Loading URLs...">
-    <button id="nextButton" onclick="navigate(1)" disabled>Next &rarr;</button>
+  <div class="container">
+    <h1>IFSTA Sitemap Navigator</h1>
+    <div class="navigator">
+      <button id="prevButton" class="btn" onclick="navigate(-1)" disabled>← Prev</button>
+      <input type="text" id="urlInput" readonly placeholder="Loading URLs...">
+      <button id="nextButton" class="btn" onclick="navigate(1)" disabled>Next →</button>
+    </div>
+    <div id="status"></div>
+    <div id="error-message"></div>
   </div>
-  <div id="status"></div>
-  <div id="error"></div>
+  <footer>
+    &copy; 2025 IFSTA Image Scraper
+  </footer>
 
   <script>
     document.addEventListener('DOMContentLoaded', () => {
@@ -110,13 +130,13 @@
       const prevButton = document.getElementById('prevButton');
       const nextButton = document.getElementById('nextButton');
       const statusDiv = document.getElementById('status');
-      const errorDiv = document.getElementById('error');
+      const errorDiv = document.getElementById('error-message');
 
       let urls = [];
-      let currentIndex = -1;
+      let currentIndex = parseInt(localStorage.getItem('sitemapCurrentIndex')) || 0;
 
       async function loadSitemapUrls() {
-        errorDiv.textContent = '';
+        errorDiv.style.display = 'none';
         statusDiv.textContent = 'Loading sitemap URLs...';
         urlInput.value = '';
         prevButton.disabled = true;
@@ -127,18 +147,21 @@
           const data = await response.json();
           if (response.ok && data.urls && data.urls.length > 0) {
             urls = data.urls;
-            currentIndex = 0;
-            urlInput.value = urls[currentIndex];
-            statusDiv.textContent = `Showing URL 1 of ${urls.length}`;
+            currentIndex = Math.min(Math.max(currentIndex, 0), urls.length - 1);
+            urlInput.value = urls[currentIndex] || '';
+            statusDiv.textContent = `Showing URL ${currentIndex + 1} of ${urls.length}`;
             prevButton.disabled = currentIndex === 0;
             nextButton.disabled = currentIndex === urls.length - 1;
+            localStorage.setItem('sitemapCurrentIndex', currentIndex);
           } else {
             errorDiv.textContent = data.error || 'No URLs found in sitemap';
+            errorDiv.style.display = 'block';
             statusDiv.textContent = '';
             urlInput.value = '';
           }
         } catch (error) {
           errorDiv.textContent = `Error: ${error.message}`;
+          errorDiv.style.display = 'block';
           statusDiv.textContent = '';
           urlInput.value = '';
         }
@@ -154,7 +177,8 @@
         statusDiv.textContent = `Showing URL ${currentIndex + 1} of ${urls.length}`;
         prevButton.disabled = currentIndex === 0;
         nextButton.disabled = currentIndex === urls.length - 1;
-        errorDiv.textContent = '';
+        errorDiv.style.display = 'none';
+        localStorage.setItem('sitemapCurrentIndex', currentIndex);
       };
 
       // Load URLs on page load
