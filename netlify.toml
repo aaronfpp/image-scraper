@@ -1,4 +1,10 @@
 [[redirects]]
+  from = "/api/:function"
+  to = "/.netlify/functions/:function"
+  status = 200
+  force = true
+
+[[redirects]]
   from = "/*"
   to = "https://aaronfpp.github.io/image-scraper/:splat"
   status = 301

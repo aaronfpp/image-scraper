@@ -1,18 +1,28 @@
 const fetch = require('node-fetch');
 const cheerio = require('cheerio');
 
-const corsHeaders = {
-  'Content-Type': 'application/json',
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
-  'Access-Control-Allow-Headers': 'Content-Type'
-};
+const ALLOWED_ORIGINS = [
+  'https://aaronfpp.github.io',
+  'https://aaronfpp.netlify.app'
+];
+
+function getCorsHeaders(origin) {
+  const corsOrigin = ALLOWED_ORIGINS.includes(origin) ? origin : ALLOWED_ORIGINS[0];
+  return {
+    'Content-Type': 'application/json',
+    'Access-Control-Allow-Origin': corsOrigin,
+    'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+    'Access-Control-Allow-Headers': 'Content-Type'
+  };
+}
 
 exports.handler = async function(event) {
+  const corsHeaders = getCorsHeaders(event.headers.origin || '');
+
   // Handle CORS preflight requests
   if (event.httpMethod === 'OPTIONS') {
     return {
-      statusCode: 200,
+      statusCode: 204,
       headers: corsHeaders,
       body: ''
     };
