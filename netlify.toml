@@ -1,7 +1,9 @@
 [[redirects]]
-  from = "/api/fetch-image/*"
-  to = "/.netlify/functions/fetch-image"
-  status = 200
+  from = "/*"
+  to = "https://aaronfpp.github.io/image-scraper/:splat"
+  status = 301
+  force = true
+
 
 [build]
   command = "npm run build"
