@@ -1,7 +1,23 @@
 const fetch = require('node-fetch');
 const cheerio = require('cheerio');
 
+const corsHeaders = {
+  'Content-Type': 'application/json',
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+  'Access-Control-Allow-Headers': 'Content-Type'
+};
+
 exports.handler = async function(event) {
+  // Handle CORS preflight requests
+  if (event.httpMethod === 'OPTIONS') {
+    return {
+      statusCode: 200,
+      headers: corsHeaders,
+      body: ''
+    };
+  }
+
   const { sku, size, type, action, url, index } = event.queryStringParameters || {};
   console.log(`Received query parameters: ${JSON.stringify(event.queryStringParameters)}`);
 
@@ -11,7 +27,7 @@ exports.handler = async function(event) {
       console.error(`Invalid or missing SKU for getProductTitle: ${sku}`);
       return {
         statusCode: 400,
-        headers: { 'Content-Type': 'application/json' },
+        headers: corsHeaders,
         body: JSON.stringify({ error: 'Invalid or missing SKU: Must be a 5-digit number' })
       };
     }
@@ -20,7 +36,7 @@ exports.handler = async function(event) {
     const result = await scrapeIFSTAPage(sku);
     return {
       statusCode: result.statusCode,
-      headers: { 'Content-Type': 'application/json' },
+      headers: corsHeaders,
       body: JSON.stringify(result.body)
     };
   }
@@ -31,7 +47,7 @@ exports.handler = async function(event) {
     const result = await scrapeSiteImages(url, parseInt(index) || 0);
     return {
       statusCode: result.statusCode,
-      headers: { 'Content-Type': 'application/json' },
+      headers: corsHeaders,
       body: JSON.stringify(result.body)
     };
   }
@@ -42,7 +58,7 @@ exports.handler = async function(event) {
     const result = await scrapeSitemapUrls();
     return {
       statusCode: result.statusCode,
-      headers: { 'Content-Type': 'application/json' },
+      headers: corsHeaders,
       body: JSON.stringify(result.body)
     };
   }
@@ -53,7 +69,7 @@ exports.handler = async function(event) {
     console.error('Missing query parameters: sku, size, or type');
     return {
       statusCode: 400,
-      headers: { 'Content-Type': 'application/json' },
+      headers: corsHeaders,
       body: JSON.stringify({ error: 'Missing sku, size, or type parameter' })
     };
   }
@@ -77,7 +93,7 @@ exports.handler = async function(event) {
     console.log(`Image fetched successfully, size: ${buffer.length} bytes`);
     return {
       statusCode: 200,
-      headers: { 'Content-Type': 'application/json' },
+      headers: corsHeaders,
       body: JSON.stringify({
         isBase64Encoded: true,
         body: buffer.toString('base64'),
@@ -88,7 +104,7 @@ exports.handler = async function(event) {
     console.error(`Error fetching ${imageUrl}: ${error.message}`);
     return {
       statusCode: error.message.includes('Status 404') ? 404 : 500,
-      headers: { 'Content-Type': 'application/json' },
+      headers: corsHeaders,
       body: JSON.stringify({ error: error.message })
     };
   }
