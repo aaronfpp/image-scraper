@@ -331,7 +331,7 @@
       statusDiv.textContent = `Checking for image ${nextIndex + 1} on ${currentUrl}...`;
 
       try {
-        const response = await fetch(`/api/fetch-image?action=getSiteImages&url=${encodeURIComponent(currentUrl)}&index=${nextIndex}`);
+        const response = await fetch(`https://ifsta-image-proxy.netlify.app/api/fetch-image?action=getSiteImages&url=${encodeURIComponent(currentUrl)}&index=${nextIndex}`);
         const data = await response.json();
         imageCheckButton.disabled = false;
         statusDiv.textContent = isManualInput ? 'Showing manual URL' : `Showing URL ${currentIndex + 1} of ${urls.length}`;
@@ -423,7 +423,7 @@
         clearButton.disabled = true;
 
         try {
-          const response = await fetch('/api/fetch-image?action=getSitemapUrls');
+          const response = await fetch('https://ifsta-image-proxy.netlify.app/api/fetch-image?action=getSitemapUrls');
           const data = await response.json();
           if (response.ok && data.urls && data.urls.length > 0) {
             urls = data.urls;
